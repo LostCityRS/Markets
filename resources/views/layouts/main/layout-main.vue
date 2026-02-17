@@ -229,29 +229,16 @@ const links = computed(() => [
                 <div
                     class="mt-4 flex flex-col items-center justify-between gap-4 border-2 border-stone-800 bg-stone-950 p-3 text-sm sm:flex-row"
                 >
-                    <p>
-                        Fan project. Not affiliated with
-                        <a
-                            href="https://2004.lostcity.rs"
-                            target="_blank"
-                            class="text-[#90c040] hover:underline"
-                            >Lost City</a
-                        >
+                    <p class="flex gap-1">
+                        Built on the original source code from <span class="text-[#90c040]">BigShot</span> <HeartIcon class="size-5 text-red-500" />
                     </p>
 
-                    <div>
-                        <a
-                            href="https://github.com/LostCityRS/Markets"
-                            target="_blank"
-                            class="flex justify-center gap-2 text-[#90c040] hover:underline sm:justify-end"
-                            ><GithubLogo class="size-5" /> Source Code</a
-                        >
-
-                        <p class="flex flex-col items-end gap-0">
-                            <span>Hosted by <span class="text-[#90c040]">Red Bracket</span></span>
-                            <span class="flex gap-1">Forked from <span class="text-[#90c040]">BigShot</span>, with love <HeartIcon class="size-5 text-red-500" /></span>
-                        </p>
-                    </div>
+                    <a
+                        href="https://github.com/LostCityRS/Markets"
+                        target="_blank"
+                        class="flex justify-center gap-2 text-[#90c040] hover:underline sm:justify-end"
+                        ><GithubLogo class="size-5" /> Source Code</a
+                    >
                 </div>
             </div>
 
