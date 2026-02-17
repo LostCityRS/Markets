@@ -241,17 +241,15 @@ const links = computed(() => [
 
                     <div>
                         <a
-                            href="https://github.com/K-John/LostCity-Market"
+                            href="https://github.com/dginovker/LostCity-Market"
                             target="_blank"
                             class="flex justify-center gap-2 text-[#90c040] hover:underline sm:justify-end"
                             ><GithubLogo class="size-5" /> Source Code</a
                         >
 
-                        <p class="flex gap-1">
-                            Made by
-                            <span class="text-[#90c040]"> BigShot </span>
-                            with love
-                            <HeartIcon class="size-5 text-red-500" />
+                        <p class="flex flex-col items-end gap-0">
+                            <span>Hosted by <span class="text-[#90c040]">Red Bracket</span></span>
+                            <span class="flex gap-1">Forked from <span class="text-[#90c040]">BigShot</span>, with love <HeartIcon class="size-5 text-red-500" /></span>
                         </p>
                     </div>
                 </div>
