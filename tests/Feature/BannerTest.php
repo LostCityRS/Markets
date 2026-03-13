@@ -2,43 +2,47 @@
 
 use App\Models\User;
 
-it('can create a banner with event_at and details_url', function () {
+it('can create a banner with event_at, timezone conversion, and computed end_at', function () {
     $admin = User::factory()->admin()->create();
 
+    // 2pm Eastern = 6pm UTC (EDT offset is -4)
     $response = $this->actingAs($admin)->post(route('admin.banners.store'), [
         'type' => 'default',
         'message' => 'Test banner message',
         'is_active' => true,
-        'start_at' => null,
-        'end_at' => null,
-        'event_at' => '2026-06-15 14:00:00',
+        'event_at' => '2026-06-15 14:00',
         'details_url' => 'https://example.com/event',
+        'timezone' => 'America/New_York',
         'display_scope' => 'global',
     ]);
 
     $response->assertRedirectToRoute('admin.banners.index');
 
     $this->assertDatabaseHas('banners', [
-        'event_at' => '2026-06-15 14:00:00',
+        'event_at' => '2026-06-15 18:00:00',
+        'end_at' => '2026-06-15 19:00:00',
         'details_url' => 'https://example.com/event',
+        'timezone' => 'America/New_York',
+        'start_at' => null,
     ]);
 });
 
-it('validates details_url is a valid url', function () {
+it('auto-prepends https:// to details_url without scheme', function () {
     $admin = User::factory()->admin()->create();
 
     $response = $this->actingAs($admin)->post(route('admin.banners.store'), [
         'type' => 'default',
         'message' => 'Test banner message',
         'is_active' => true,
-        'start_at' => null,
-        'end_at' => null,
-        'event_at' => null,
-        'details_url' => 'not-a-url',
+        'details_url' => 'example.com/event',
         'display_scope' => 'global',
     ]);
 
-    $response->assertSessionHasErrors('details_url');
+    $response->assertRedirectToRoute('admin.banners.index');
+
+    $this->assertDatabaseHas('banners', [
+        'details_url' => 'https://example.com/event',
+    ]);
 });
 
 it('validates event_at is a valid date', function () {
@@ -48,8 +52,6 @@ it('validates event_at is a valid date', function () {
         'type' => 'default',
         'message' => 'Test banner message',
         'is_active' => true,
-        'start_at' => null,
-        'end_at' => null,
         'event_at' => 'garbage',
         'details_url' => null,
         'display_scope' => 'global',
@@ -65,8 +67,6 @@ it('can create a banner without event_at and details_url', function () {
         'type' => 'default',
         'message' => 'Test banner message',
         'is_active' => true,
-        'start_at' => null,
-        'end_at' => null,
         'display_scope' => 'global',
     ]);
 
@@ -76,5 +76,7 @@ it('can create a banner without event_at and details_url', function () {
         'message' => 'Test banner message',
         'event_at' => null,
         'details_url' => null,
+        'end_at' => null,
+        'start_at' => null,
     ]);
 });

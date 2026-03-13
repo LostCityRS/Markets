@@ -22,11 +22,15 @@ const display_scopes = computed((): Enums.BannerDisplayScope[] => [
 
 const timezones = [
     { label: "UTC", value: "UTC" },
-    { label: "EST", value: "America/New_York" },
-    { label: "PST", value: "America/Los_Angeles" },
+    { label: "Eastern", value: "America/New_York" },
+    { label: "Pacific", value: "America/Los_Angeles" },
 ] as const;
 
-const selectedTimezone = ref(timezones[0]);
+// Initialize timezone from form data (persisted) or default to UTC
+const initialTz =
+    timezones.find((tz) => tz.value === props.bannerForm.timezone) ??
+    timezones[0];
+form.timezone = initialTz.value;
 
 const submitRoute = props.bannerForm.id
     ? route("admin.banners.update", { id: props.bannerForm.id })
@@ -46,7 +50,6 @@ const submit = () => {
 
 const selectedItem = ref<Data.Item.ItemData | null>(null);
 const showPreview = ref(false);
-const endAtManuallySet = ref(!!props.bannerForm.end_at);
 
 // Watch for selectedItem change, add it to the form
 watch(selectedItem, (newItem) => {
@@ -56,26 +59,14 @@ watch(selectedItem, (newItem) => {
     }
 });
 
-// Auto-set end_at to 1 hour after event_at unless manually overwritten
-watch(
-    () => form.event_at,
-    (newEventAt) => {
-        if (newEventAt && !endAtManuallySet.value) {
-            const eventDate = new Date(newEventAt);
-            eventDate.setHours(eventDate.getHours() + 1);
-            const pad = (n: number) => String(n).padStart(2, "0");
-            form.end_at = `${eventDate.getFullYear()}-${pad(eventDate.getMonth() + 1)}-${pad(eventDate.getDate())}T${pad(eventDate.getHours())}:${pad(eventDate.getMinutes())}`;
-        }
-    },
-);
-
-// Track when end_at is manually changed
-watch(
-    () => form.end_at,
-    () => {
-        endAtManuallySet.value = true;
-    },
-);
+// Computed end_at display (always event_at + 1h, read-only)
+const endAtDisplay = computed(() => {
+    if (!form.event_at) return null;
+    const eventDate = new Date(form.event_at);
+    eventDate.setHours(eventDate.getHours() + 1);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${eventDate.getFullYear()}-${pad(eventDate.getMonth() + 1)}-${pad(eventDate.getDate())}T${pad(eventDate.getHours())}:${pad(eventDate.getMinutes())}`;
+});
 
 const addItemToForm = (item: Data.Item.ItemFormData) => {
     if (!form.items) {
@@ -251,63 +242,39 @@ const removeItemFromForm = (item: Data.Item.ItemFormData) => {
                         type="button"
                         class="rounded px-2 py-0.5 text-xs"
                         :class="
-                            selectedTimezone.value === tz.value
+                            form.timezone === tz.value
                                 ? 'bg-stone-600 text-white'
                                 : 'bg-stone-800 text-stone-400 hover:text-stone-300'
                         "
-                        @click="selectedTimezone = tz"
+                        @click="form.timezone = tz.value"
                     >
                         {{ tz.label }}
                     </button>
                 </div>
 
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-                    <div class="flex w-full flex-col gap-2 sm:w-1/3">
-                        <label for="type">Style</label>
+                <div class="flex flex-col gap-2">
+                    <label for="type">Style</label>
 
-                        <select
-                            id="type"
-                            v-model="form.type"
-                            class="border-slate-900 bg-stone-700 p-2"
+                    <select
+                        id="type"
+                        v-model="form.type"
+                        class="border-slate-900 bg-stone-700 p-2"
+                    >
+                        <option
+                            v-for="type in bannerTypes"
+                            :key="type"
+                            :value="type"
                         >
-                            <option
-                                v-for="type in bannerTypes"
-                                :key="type"
-                                :value="type"
-                            >
-                                {{
-                                    type.charAt(0).toUpperCase() + type.slice(1)
-                                }}
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="flex w-full grow flex-col gap-2 sm:w-1/3">
-                        <label for="start_at">Start At (optional)</label>
-
-                        <input
-                            id="start_at"
-                            v-model="form.start_at"
-                            type="datetime-local"
-                            class="w-full border-slate-900 bg-stone-700 p-2"
-                        />
-                    </div>
-
-                    <div class="flex w-full grow flex-col gap-2 sm:w-1/3">
-                        <label for="end_at">End At (optional)</label>
-
-                        <input
-                            id="end_at"
-                            v-model="form.end_at"
-                            type="datetime-local"
-                            class="w-full border-slate-900 bg-stone-700 p-2"
-                        />
-                    </div>
+                            {{
+                                type.charAt(0).toUpperCase() + type.slice(1)
+                            }}
+                        </option>
+                    </select>
                 </div>
 
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-                    <div class="flex w-full grow flex-col gap-2 sm:w-1/2">
-                        <label for="event_at">Event Time (optional)</label>
+                    <div class="flex w-full flex-col gap-2 sm:w-1/2">
+                        <label for="event_at">Event Time</label>
 
                         <input
                             id="event_at"
@@ -317,13 +284,27 @@ const removeItemFromForm = (item: Data.Item.ItemFormData) => {
                         />
                     </div>
 
+                    <div class="flex w-full flex-col gap-2 sm:w-1/2">
+                        <label for="end_at">End At</label>
+
+                        <input
+                            id="end_at"
+                            :value="endAtDisplay"
+                            type="datetime-local"
+                            class="w-full border-slate-900 bg-stone-700/50 p-2 text-stone-400"
+                            disabled
+                        />
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
                     <div class="flex w-full grow flex-col gap-2 sm:w-1/2">
                         <label for="details_url">Details URL (optional)</label>
 
                         <input
                             id="details_url"
                             v-model="form.details_url"
-                            type="url"
+                            type="text"
                             placeholder="https://..."
                             class="w-full border-slate-900 bg-stone-700 p-2"
                         />

@@ -23,6 +23,7 @@ class BannerData extends Data
         public ?DateTime $endAt,
         public ?DateTime $eventAt = null,
         public ?string $detailsUrl = null,
+        public ?string $timezone = null,
         /** @var DataCollection<\App\Data\Item\ItemData> */
         public ?DataCollection $items = null,
     ) {

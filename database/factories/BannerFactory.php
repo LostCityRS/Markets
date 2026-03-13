@@ -16,6 +16,7 @@ class BannerFactory extends Factory
             'end_at' => null,
             'event_at' => null,
             'details_url' => null,
+            'timezone' => null,
         ];
     }
 }

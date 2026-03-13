@@ -78,8 +78,8 @@ const props = defineProps<Pages.Admin.BannersIndexPage>();
                     </th>
 
                     <th>
-                        <SortHeader field="start_at" class="py-2 font-semibold"
-                            >Start At</SortHeader
+                        <SortHeader field="event_at" class="py-2 font-semibold"
+                            >Event At</SortHeader
                         >
                     </th>
 
@@ -121,11 +121,11 @@ const props = defineProps<Pages.Admin.BannersIndexPage>();
                 </td>
 
                 <td class="whitespace-nowrap">
-                    <Tooltip v-if="banner.startAt">
-                        {{ new Date(banner.startAt).toLocaleDateString() }} UTC
+                    <Tooltip v-if="banner.eventAt">
+                        {{ new Date(banner.eventAt).toLocaleString() }}
 
                         <template #popper>
-                            {{ new Date(banner.startAt).toLocaleString() }} UTC
+                            {{ new Date(banner.eventAt).toUTCString() }}
                         </template>
                     </Tooltip>
 
@@ -134,10 +134,10 @@ const props = defineProps<Pages.Admin.BannersIndexPage>();
 
                 <td class="whitespace-nowrap">
                     <Tooltip v-if="banner.endAt">
-                        {{ new Date(banner.endAt).toLocaleDateString() }} UTC
+                        {{ new Date(banner.endAt).toLocaleString() }}
 
                         <template #popper>
-                            {{ new Date(banner.endAt).toLocaleString() }} UTC
+                            {{ new Date(banner.endAt).toUTCString() }}
                         </template>
                     </Tooltip>
 
@@ -176,7 +176,7 @@ const props = defineProps<Pages.Admin.BannersIndexPage>();
             </tr>
 
             <tr v-if="!props.banners.data.length">
-                <td class="text-center" colspan="8">No banners found.</td>
+                <td class="text-center" colspan="7">No banners found.</td>
             </tr>
 
             <template v-if="props.banners.data.length" #footer>

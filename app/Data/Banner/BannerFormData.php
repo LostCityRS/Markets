@@ -19,6 +19,7 @@ class BannerFormData extends Data
         public ?string $end_at,
         public ?string $event_at = null,
         public ?string $details_url = null,
+        public ?string $timezone = null,
         /** @var DataCollection<\App\Data\Item\ItemFormData> */
         public ?DataCollection $items,
         public ?BannerDisplayScope $display_scope = null
@@ -32,10 +33,9 @@ class BannerFormData extends Data
             'message' => ['required', 'string', 'min:5', 'max:512'],
             'type' => ['required', 'string', 'in:default,warning,info,success,error'],
             'is_active' => ['required', 'boolean'],
-            'start_at' => ['nullable', 'date'],
-            'end_at' => ['nullable', 'date', 'after:start_at'],
             'event_at' => ['nullable', 'date'],
-            'details_url' => ['nullable', 'url', 'max:512'],
+            'details_url' => ['nullable', 'string', 'max:512'],
+            'timezone' => ['nullable', 'string', 'max:64'],
         ];
     }
 
