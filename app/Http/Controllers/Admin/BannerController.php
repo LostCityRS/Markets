@@ -41,6 +41,8 @@ class BannerController
                 is_active: true,
                 start_at: null,
                 end_at: null,
+                event_at: null,
+                details_url: null,
                 items: null,
             )
         ));
@@ -77,6 +79,8 @@ class BannerController
                 is_active: $banner->is_active,
                 start_at: $banner->start_at,
                 end_at: $banner->end_at,
+                event_at: $banner->event_at,
+                details_url: $banner->details_url,
                 items: ItemData::collect($banner->items, DataCollection::class),
             )
         ));

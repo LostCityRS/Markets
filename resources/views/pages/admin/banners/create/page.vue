@@ -20,6 +20,14 @@ const display_scopes = computed((): Enums.BannerDisplayScope[] => [
     "item",
 ]);
 
+const timezones = [
+    { label: "UTC", value: "UTC" },
+    { label: "EST", value: "America/New_York" },
+    { label: "PST", value: "America/Los_Angeles" },
+] as const;
+
+const selectedTimezone = ref(timezones[0]);
+
 const submitRoute = props.bannerForm.id
     ? route("admin.banners.update", { id: props.bannerForm.id })
     : route("admin.banners.store");
@@ -38,6 +46,7 @@ const submit = () => {
 
 const selectedItem = ref<Data.Item.ItemData | null>(null);
 const showPreview = ref(false);
+const endAtManuallySet = ref(!!props.bannerForm.end_at);
 
 // Watch for selectedItem change, add it to the form
 watch(selectedItem, (newItem) => {
@@ -46,6 +55,27 @@ watch(selectedItem, (newItem) => {
         selectedItem.value = null;
     }
 });
+
+// Auto-set end_at to 1 hour after event_at unless manually overwritten
+watch(
+    () => form.event_at,
+    (newEventAt) => {
+        if (newEventAt && !endAtManuallySet.value) {
+            const eventDate = new Date(newEventAt);
+            eventDate.setHours(eventDate.getHours() + 1);
+            const pad = (n: number) => String(n).padStart(2, "0");
+            form.end_at = `${eventDate.getFullYear()}-${pad(eventDate.getMonth() + 1)}-${pad(eventDate.getDate())}T${pad(eventDate.getHours())}:${pad(eventDate.getMinutes())}`;
+        }
+    },
+);
+
+// Track when end_at is manually changed
+watch(
+    () => form.end_at,
+    () => {
+        endAtManuallySet.value = true;
+    },
+);
 
 const addItemToForm = (item: Data.Item.ItemFormData) => {
     if (!form.items) {
@@ -213,7 +243,25 @@ const removeItemFromForm = (item: Data.Item.ItemFormData) => {
 
                 <hr class="my-3 border-stone-600" />
 
-                <div class="flex flex-col items-center gap-3 sm:flex-row">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-stone-400">Timezone:</span>
+                    <button
+                        v-for="tz in timezones"
+                        :key="tz.value"
+                        type="button"
+                        class="rounded px-2 py-0.5 text-xs"
+                        :class="
+                            selectedTimezone.value === tz.value
+                                ? 'bg-stone-600 text-white'
+                                : 'bg-stone-800 text-stone-400 hover:text-stone-300'
+                        "
+                        @click="selectedTimezone = tz"
+                    >
+                        {{ tz.label }}
+                    </button>
+                </div>
+
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
                     <div class="flex w-full flex-col gap-2 sm:w-1/3">
                         <label for="type">Style</label>
 
@@ -241,7 +289,7 @@ const removeItemFromForm = (item: Data.Item.ItemFormData) => {
                             id="start_at"
                             v-model="form.start_at"
                             type="datetime-local"
-                            class="border-slate-900 bg-stone-700 p-2"
+                            class="w-full border-slate-900 bg-stone-700 p-2"
                         />
                     </div>
 
@@ -252,7 +300,32 @@ const removeItemFromForm = (item: Data.Item.ItemFormData) => {
                             id="end_at"
                             v-model="form.end_at"
                             type="datetime-local"
-                            class="border-slate-900 bg-stone-700 p-2"
+                            class="w-full border-slate-900 bg-stone-700 p-2"
+                        />
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                    <div class="flex w-full grow flex-col gap-2 sm:w-1/2">
+                        <label for="event_at">Event Time (optional)</label>
+
+                        <input
+                            id="event_at"
+                            v-model="form.event_at"
+                            type="datetime-local"
+                            class="w-full border-slate-900 bg-stone-700 p-2"
+                        />
+                    </div>
+
+                    <div class="flex w-full grow flex-col gap-2 sm:w-1/2">
+                        <label for="details_url">Details URL (optional)</label>
+
+                        <input
+                            id="details_url"
+                            v-model="form.details_url"
+                            type="url"
+                            placeholder="https://..."
+                            class="w-full border-slate-900 bg-stone-700 p-2"
                         />
                     </div>
                 </div>

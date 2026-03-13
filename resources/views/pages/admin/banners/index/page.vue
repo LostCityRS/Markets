@@ -120,24 +120,24 @@ const props = defineProps<Pages.Admin.BannersIndexPage>();
                     {{ banner.type }}
                 </td>
 
-                <td>
+                <td class="whitespace-nowrap">
                     <Tooltip v-if="banner.startAt">
-                        {{ new Date(banner.startAt).toLocaleDateString() }}
+                        {{ new Date(banner.startAt).toLocaleDateString() }} UTC
 
                         <template #popper>
-                            {{ new Date(banner.startAt).toLocaleString() }}
+                            {{ new Date(banner.startAt).toLocaleString() }} UTC
                         </template>
                     </Tooltip>
 
                     <span v-else class="text-stone-500">N/A</span>
                 </td>
 
-                <td>
+                <td class="whitespace-nowrap">
                     <Tooltip v-if="banner.endAt">
-                        {{ new Date(banner.endAt).toLocaleDateString() }}
+                        {{ new Date(banner.endAt).toLocaleDateString() }} UTC
 
                         <template #popper>
-                            {{ new Date(banner.endAt).toLocaleString() }}
+                            {{ new Date(banner.endAt).toLocaleString() }} UTC
                         </template>
                     </Tooltip>
 

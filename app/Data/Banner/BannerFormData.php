@@ -17,6 +17,8 @@ class BannerFormData extends Data
         public bool $is_active = true,
         public ?string $start_at,
         public ?string $end_at,
+        public ?string $event_at = null,
+        public ?string $details_url = null,
         /** @var DataCollection<\App\Data\Item\ItemFormData> */
         public ?DataCollection $items,
         public ?BannerDisplayScope $display_scope = null
@@ -32,6 +34,8 @@ class BannerFormData extends Data
             'is_active' => ['required', 'boolean'],
             'start_at' => ['nullable', 'date'],
             'end_at' => ['nullable', 'date', 'after:start_at'],
+            'event_at' => ['nullable', 'date'],
+            'details_url' => ['nullable', 'url', 'max:512'],
         ];
     }
 

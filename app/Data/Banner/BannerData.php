@@ -21,6 +21,8 @@ class BannerData extends Data
         public bool $isActive,
         public ?DateTime $startAt,
         public ?DateTime $endAt,
+        public ?DateTime $eventAt = null,
+        public ?string $detailsUrl = null,
         /** @var DataCollection<\App\Data\Item\ItemData> */
         public ?DataCollection $items = null,
     ) {

@@ -27,6 +27,7 @@ class Banner extends Model
         return [
             'start_at' => 'datetime',
             'end_at' => 'datetime',
+            'event_at' => 'datetime',
         ];
     }
 
