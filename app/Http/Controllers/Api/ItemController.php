@@ -33,7 +33,7 @@ class ItemController
             ->where(function ($q) use ($search) {
                 $q->where('name', 'LIKE', '%' . $search . '%')
                     ->orWhere('slug', 'LIKE', '%' . str_replace(' ', '_', $search) . '%')
-                    ->orWhere('search_aliases', 'LIKE', '%' . $search . '%');
+                    ->orWhereRaw('LOWER(search_aliases) LIKE ?', ['%' . strtolower($search) . '%']);
             })
             ->orderByRaw('CHAR_LENGTH(name)')
             ->limit(5)
