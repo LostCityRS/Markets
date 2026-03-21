@@ -52,6 +52,7 @@ slug: string;
 cost: number;
 isActive: boolean;
 isListable: boolean;
+searchAliases: Array<any> | null;
 };
 export type AdminItemFormData = {
 id: number;
@@ -60,6 +61,7 @@ slug: string;
 cost: number;
 is_active: boolean;
 is_listable: boolean;
+search_aliases: Array<any> | null;
 };
 export type ItemData = {
 isFavorite: boolean;

@@ -13,9 +13,11 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Item extends Model
 {
-    use LogsActivity;
+    use HasFactory, LogsActivity;
 
     public $guarded = [];
+
+    public $timestamps = false;
 
     /**
      * Scope to filter only active items.
@@ -49,10 +51,17 @@ class Item extends Model
             ->withTimestamps();
     }
 
+    protected function casts(): array
+    {
+        return [
+            'search_aliases' => 'array',
+        ];
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['id', 'name', 'cost', 'slug', 'is_active'])
+            ->logOnly(['id', 'name', 'cost', 'slug', 'is_active', 'search_aliases'])
             ->logOnlyDirty();
     }
 }

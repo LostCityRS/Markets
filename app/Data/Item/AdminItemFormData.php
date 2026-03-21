@@ -15,7 +15,8 @@ class AdminItemFormData extends Data
         public string $slug,
         public int $cost,
         public bool $is_active,
-        public bool $is_listable
+        public bool $is_listable,
+        public ?array $search_aliases
     ) {}
 
     public static function rules(): array
@@ -25,6 +26,8 @@ class AdminItemFormData extends Data
             'slug' => ['required', 'string', 'min:1'],
             'cost' => ['required', 'integer', 'min:1'],
             'is_active' => ['bool'],
+            'search_aliases' => ['nullable', 'array'],
+            'search_aliases.*' => ['string', 'min:1'],
         ];
     }
 }

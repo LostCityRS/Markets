@@ -13,6 +13,7 @@ class AdminItemData extends Data
         public string $slug,
         public int $cost,
         public bool $isActive,
-        public bool $isListable
+        public bool $isListable,
+        public ?array $searchAliases
     ) {}
 }

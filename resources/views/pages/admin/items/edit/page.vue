@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import { Head } from "@inertiajs/vue3";
 import { PencilIcon } from "@heroicons/vue/24/outline";
 
@@ -7,7 +8,25 @@ const props = defineProps<Pages.Admin.ItemsEditPage>();
 const auth = useAuth();
 const form = useForm({
     ...props.itemForm,
+    search_aliases: props.itemForm.search_aliases ?? [],
 });
+
+const newAlias = ref("");
+
+const addAlias = () => {
+    const alias = newAlias.value.trim();
+    if (alias === "") return;
+    if (form.search_aliases.includes(alias)) {
+        newAlias.value = "";
+        return;
+    }
+    form.search_aliases.push(alias);
+    newAlias.value = "";
+};
+
+const removeAlias = (index: number) => {
+    form.search_aliases.splice(index, 1);
+};
 
 const back = () => {
     window.history.back();
@@ -132,6 +151,50 @@ const submit = (close: () => void) => {
                             type="checkbox"
                             class="size-4 border-slate-900 bg-stone-700 py-0 pl-1"
                         />
+                    </div>
+
+                    <div>
+                        <label class="font-semibold text-stone-300">
+                            Search Aliases
+                        </label>
+
+                        <div class="flex items-center gap-2">
+                            <input
+                                v-model="newAlias"
+                                type="text"
+                                class="border-slate-900 bg-stone-700 py-0 pl-1"
+                                placeholder="Add alias..."
+                                @keydown.enter.prevent="addAlias"
+                            />
+
+                            <BaseButton
+                                type="button"
+                                variant="secondary"
+                                @click="addAlias"
+                            >
+                                Add
+                            </BaseButton>
+                        </div>
+
+                        <div
+                            v-if="form.search_aliases.length > 0"
+                            class="mt-2 flex flex-wrap gap-2"
+                        >
+                            <span
+                                v-for="(alias, index) in form.search_aliases"
+                                :key="index"
+                                class="inline-flex items-center gap-1 rounded bg-stone-700 px-2 py-1 text-sm text-stone-200"
+                            >
+                                {{ alias }}
+                                <button
+                                    type="button"
+                                    class="ml-1 text-stone-400 hover:text-red-400"
+                                    @click="removeAlias(index)"
+                                >
+                                    &times;
+                                </button>
+                            </span>
+                        </div>
                     </div>
                 </div>
 

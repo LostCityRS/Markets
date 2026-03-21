@@ -48,7 +48,8 @@ class ItemController extends Controller
             $search = $filters['search'];
 
             $items = $items->where('name', 'LIKE', '%' . $search . '%')
-                ->orWhere('slug', 'LIKE', '%' . str_replace(' ', '_', $search) . '%');
+                ->orWhere('slug', 'LIKE', '%' . str_replace(' ', '_', $search) . '%')
+                ->orWhere('search_aliases', 'LIKE', '%' . $search . '%');
         }
 
         if (! is_null($filters['is_active'])) {
@@ -80,7 +81,8 @@ class ItemController extends Controller
                 slug: $item->slug,
                 cost: $item->cost,
                 is_active: $item->is_active,
-                is_listable: $item->is_listable
+                is_listable: $item->is_listable,
+                search_aliases: $item->search_aliases
             ),
         ))
             ->baseRoute('admin.items.index');
