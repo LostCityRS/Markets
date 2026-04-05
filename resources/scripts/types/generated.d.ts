@@ -28,6 +28,7 @@ endAt: string | null;
 eventAt: string | null;
 detailsUrl: string | null;
 timezone: string | null;
+bannerImage: string | null;
 items: Array<Data.Item.ItemData> | null;
 };
 export type BannerFormData = {
@@ -40,6 +41,7 @@ end_at: string | null;
 event_at: string | null;
 details_url: string | null;
 timezone: string | null;
+banner_image: string | null;
 items: Array<Data.Item.ItemFormData> | null;
 display_scope: Enums.BannerDisplayScope | null;
 };

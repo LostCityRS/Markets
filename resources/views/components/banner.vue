@@ -94,6 +94,13 @@ onUnmounted(() => {
 
 <template>
     <Alert :id="`banner-${props.banner.id}`" :type="props.banner.type">
+        <img
+            v-if="props.banner.bannerImage"
+            :src="props.banner.bannerImage"
+            alt="Event banner"
+            class="max-h-[120px] w-full rounded object-cover"
+        />
+
         <VueMarkdown
             :source="props.banner.message"
             class="prose prose-sm prose-stone prose-invert prose-headings:mb-2 prose-headings:mt-0 prose-headings:font-semibold"

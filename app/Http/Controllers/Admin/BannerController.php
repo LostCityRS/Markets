@@ -45,14 +45,46 @@ class BannerController
                 event_at: null,
                 details_url: null,
                 timezone: null,
+                banner_image: null,
                 items: null,
             )
         ));
     }
 
+    private function handleBannerImage(Request $request, ?string $existingImage = null): ?string
+    {
+        if ($request->boolean('remove_banner_image')) {
+            if ($existingImage) {
+                $fullPath = public_path($existingImage);
+                if (file_exists($fullPath)) {
+                    unlink($fullPath);
+                }
+            }
+            return null;
+        }
+
+        if ($request->hasFile('banner_image_file')) {
+            $file = $request->file('banner_image_file');
+            $filename = uniqid('banner_') . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img/banners'), $filename);
+
+            // Delete old image if replacing
+            if ($existingImage) {
+                $fullPath = public_path($existingImage);
+                if (file_exists($fullPath)) {
+                    unlink($fullPath);
+                }
+            }
+
+            return '/img/banners/' . $filename;
+        }
+
+        return $existingImage;
+    }
+
     private function prepareBannerData(BannerFormData $data): array
     {
-        $bannerData = collect($data->toArray())->except(['items', 'display_scope'])->toArray();
+        $bannerData = collect($data->toArray())->except(['items', 'display_scope', 'banner_image_file', 'remove_banner_image'])->toArray();
 
         // Remove start_at — banners without end_at are always visible
         $bannerData['start_at'] = null;
@@ -85,7 +117,14 @@ class BannerController
 
     public function store(BannerFormData $data, Request $request)
     {
+        if ($request->hasFile('banner_image_file')) {
+            $request->validate([
+                'banner_image_file' => ['image', 'max:10240'],
+            ]);
+        }
+
         $bannerData = $this->prepareBannerData($data);
+        $bannerData['banner_image'] = $this->handleBannerImage($request);
         $banner = Banner::create($bannerData);
 
         if ($data->items) {
@@ -127,6 +166,7 @@ class BannerController
                 event_at: $eventAt,
                 details_url: $banner->details_url,
                 timezone: $timezone,
+                banner_image: $banner->banner_image,
                 items: ItemData::collect($banner->items, DataCollection::class),
             )
         ));
@@ -134,7 +174,14 @@ class BannerController
 
     public function update(BannerFormData $data, Banner $banner, Request $request)
     {
+        if ($request->hasFile('banner_image_file')) {
+            $request->validate([
+                'banner_image_file' => ['image', 'max:10240'],
+            ]);
+        }
+
         $bannerData = $this->prepareBannerData($data);
+        $bannerData['banner_image'] = $this->handleBannerImage($request, $banner->banner_image);
         $banner->update($bannerData);
 
         $originalItemIds = $banner->items()->pluck('items.id')->toArray();

@@ -20,6 +20,7 @@ class BannerFormData extends Data
         public ?string $event_at = null,
         public ?string $details_url = null,
         public ?string $timezone = null,
+        public ?string $banner_image = null,
         /** @var DataCollection<\App\Data\Item\ItemFormData> */
         public ?DataCollection $items,
         public ?BannerDisplayScope $display_scope = null
@@ -36,6 +37,7 @@ class BannerFormData extends Data
             'event_at' => ['nullable', 'date'],
             'details_url' => ['nullable', 'string', 'max:512'],
             'timezone' => ['nullable', 'string', 'max:64'],
+            'banner_image' => ['nullable', 'string', 'max:512'],
         ];
     }
 

@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { ArrowLeftIcon } from "@heroicons/vue/24/outline";
+import { ArrowLeftIcon, PhotoIcon } from "@heroicons/vue/24/outline";
 import VueMarkdown from "vue-markdown-render";
+import { Cropper } from "vue-advanced-cropper";
+import "vue-advanced-cropper/dist/style.css";
 const props = defineProps<Pages.Admin.BannersCreatePage>();
 
 const form = useForm({
     ...props.bannerForm,
+    banner_image_file: null as File | null,
+    remove_banner_image: false,
 });
 
 const bannerTypes = computed((): Enums.BannerType[] => [
@@ -42,6 +46,7 @@ const pageTitle = computed(() => `${form.id ? "Edit" : "Create"} Banner`);
 const submit = () => {
     form[submitMethod ?? "post"](submitRoute, {
         preserveScroll: true,
+        forceFormData: true,
         onSuccess: () => {
             form.reset();
         },
@@ -84,6 +89,65 @@ const removeItemFromForm = (item: Data.Item.ItemFormData) => {
             (i: Data.Item.ItemFormData) => i.id !== item.id,
         );
     }
+};
+
+// Banner image upload + crop
+const cropperSrc = ref<string | null>(null);
+const cropperRef = ref<InstanceType<typeof Cropper> | null>(null);
+const imagePreview = ref<string | null>(props.bannerForm.banner_image);
+const fileInput = ref<HTMLInputElement | null>(null);
+
+const triggerFileInput = () => {
+    const el = document.querySelector<HTMLInputElement>('input[type="file"][accept="image/*"]');
+    el?.click();
+};
+
+const onFileSelected = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        cropperSrc.value = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+};
+
+const applyCrop = () => {
+    if (!cropperRef.value) return;
+
+    const { canvas } = cropperRef.value.getResult();
+    if (!canvas) return;
+
+    canvas.toBlob(
+        (blob: Blob | null) => {
+            if (!blob) return;
+            const file = new File([blob], "banner.jpg", {
+                type: "image/jpeg",
+            });
+            form.banner_image_file = file;
+            form.remove_banner_image = false;
+            imagePreview.value = canvas.toDataURL("image/jpeg", 0.85);
+            cropperSrc.value = null;
+        },
+        "image/jpeg",
+        0.85,
+    );
+};
+
+const cancelCrop = () => {
+    cropperSrc.value = null;
+    if (fileInput.value) fileInput.value.value = "";
+};
+
+const removeBannerImage = () => {
+    form.banner_image_file = null;
+    form.banner_image = null;
+    form.remove_banner_image = true;
+    imagePreview.value = null;
+    cropperSrc.value = null;
+    if (fileInput.value) fileInput.value.value = "";
 };
 </script>
 
@@ -308,6 +372,85 @@ const removeItemFromForm = (item: Data.Item.ItemFormData) => {
                             placeholder="https://..."
                             class="w-full border-slate-900 bg-stone-700 p-2"
                         />
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label>Banner Image (optional)</label>
+
+                    <div
+                        v-if="imagePreview && !cropperSrc"
+                        class="flex flex-col gap-2"
+                    >
+                        <img
+                            :src="imagePreview"
+                            alt="Banner preview"
+                            class="max-h-[120px] w-full rounded border border-stone-700 object-cover"
+                        />
+                        <div class="flex gap-2">
+                            <label
+                                for="banner_image_upload"
+                                class="cursor-pointer text-sm text-stone-400 hover:text-stone-200"
+                            >
+                                Replace
+                            </label>
+                            <button
+                                type="button"
+                                class="text-sm text-red-400 hover:text-red-300"
+                                @click="removeBannerImage"
+                            >
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+
+                    <label
+                        v-if="!imagePreview && !cropperSrc"
+                        for="banner_image_upload"
+                        class="flex cursor-pointer items-center gap-2 rounded border-2 border-dashed border-stone-600 p-4 text-stone-400 hover:border-stone-500 hover:text-stone-300"
+                    >
+                        <PhotoIcon class="size-6" />
+                        Upload banner image
+                    </label>
+
+                    <input
+                        id="banner_image_upload"
+                        ref="fileInput"
+                        type="file"
+                        accept="image/*"
+                        class="sr-only"
+                        @change="onFileSelected"
+                    />
+
+                    <div v-if="cropperSrc" class="flex flex-col gap-2">
+                        <p class="text-sm text-stone-400">
+                            Crop your image to banner proportions:
+                        </p>
+                        <Cropper
+                            ref="cropperRef"
+                            :src="cropperSrc"
+                            :stencil-props="{
+                                aspectRatio: 5,
+                            }"
+                            class="max-h-[300px] rounded border border-stone-700"
+                        />
+                        <div class="flex gap-2">
+                            <BaseButton
+                                type="button"
+                                variant="success"
+                                class="!px-4 !py-1 text-sm"
+                                @click="applyCrop"
+                            >
+                                Apply Crop
+                            </BaseButton>
+                            <button
+                                type="button"
+                                class="text-sm text-stone-400 hover:text-stone-200"
+                                @click="cancelCrop"
+                            >
+                                Cancel
+                            </button>
+                        </div>
                     </div>
                 </div>
 
