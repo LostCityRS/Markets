@@ -61,7 +61,7 @@ const submit = (close: () => void) => {
             <div class="flex items-center gap-2">
                 <div class="w-fit border border-stone-700 bg-stone-800">
                     <img
-                        :src="`/img/items/${item.slug}.webp`"
+                        :src="`/img/items/${encodeURIComponent(item.slug)}.webp`"
                         :alt="`${item.name} Icon`"
                         class="min-h-[24px] min-w-[24px]"
                         width="32"

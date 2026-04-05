@@ -114,7 +114,7 @@ onUnmounted(() => {
                     class="size-fit border-2 border-stone-600 bg-stone-800 p-1"
                 >
                     <img
-                        :src="`/img/items/${item.slug}.webp`"
+                        :src="`/img/items/${encodeURIComponent(item.slug)}.webp`"
                         :alt="`${item.name} Icon`"
                         width="32"
                         height="32"

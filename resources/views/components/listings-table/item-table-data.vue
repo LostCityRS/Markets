@@ -23,7 +23,7 @@ defineProps<{
                 "
             >
                 <img
-                    :src="`/img/items/${item.slug}.webp`"
+                    :src="`/img/items/${encodeURIComponent(item.slug)}.webp`"
                     :alt="`${item.name} Icon`"
                     class="min-h-[24px] min-w-[24px]"
                     width="32"

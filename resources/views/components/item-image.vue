@@ -35,7 +35,7 @@ const src = computed(() => {
         return `/img/items/${getCoinsImage(props.quantity ?? 1)}.webp`;
     }
 
-    return `/img/items/${props.item.slug}.webp`;
+    return `/img/items/${encodeURIComponent(props.item.slug)}.webp`;
 });
 
 const alt = computed(() => (props.item ? props.item.name : ""));

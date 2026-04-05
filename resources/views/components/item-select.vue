@@ -68,7 +68,7 @@ watch(selected, (newValue) => {
                 <div class="border border-stone-600 bg-stone-700">
                     <img
                         class="min-h-[32px] min-w-[32px]"
-                        :src="`/img/items/${option.slug}.webp`"
+                        :src="`/img/items/${encodeURIComponent(option.slug)}.webp`"
                         :alt="`${option.name} Icon`"
                         width="32"
                         height="32"
@@ -84,7 +84,7 @@ watch(selected, (newValue) => {
                 <div class="border border-stone-600 bg-stone-700">
                     <img
                         class="min-h-[32px] min-w-[32px]"
-                        :src="`/img/items/${option.slug}.webp`"
+                        :src="`/img/items/${encodeURIComponent(option.slug)}.webp`"
                         :alt="`${option.name} Icon`"
                         width="32"
                         height="32"

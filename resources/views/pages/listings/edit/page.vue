@@ -34,7 +34,7 @@ const back = () => {
             <div v-if="listing.item" class="flex items-center gap-2">
                 <div class="w-fit border border-stone-700 bg-stone-800">
                     <img
-                        :src="`/img/items/${listing.item.slug}.webp`"
+                        :src="`/img/items/${encodeURIComponent(listing.item.slug)}.webp`"
                         :alt="`${listing.item.name} Icon`"
                         class="min-h-[24px] min-w-[24px]"
                         width="32"
