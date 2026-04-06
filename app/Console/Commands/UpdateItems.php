@@ -38,6 +38,12 @@ class UpdateItems extends Command
                 continue;
             }
 
+            if (($newItem['is_listable'] ?? null) !== ($oldItem['is_listable'] ?? null)) {
+
+                $this->info("Updating item tradeable status: {$newItem['slug']}");
+                DB::table('items')->where('game_id', $newItem['game_id'])->update(['is_listable' => $newItem['is_listable']]);
+            }
+
             if ($newItem['cost'] <> $oldItem['cost']) {
 
                 $this->info("Updating item: {$newItem['slug']}");
@@ -67,6 +73,7 @@ class UpdateItems extends Command
                 'slug' => $item['debugname'],
                 'cost' => $item['cost'],
                 'description' => $item['desc'],
+                'is_listable' => $item['tradeable'] ?? true,
             ];
         }, $items);
     }
