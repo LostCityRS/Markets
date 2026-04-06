@@ -14,6 +14,11 @@ const eventDate = computed(() =>
     props.banner.eventAt ? new Date(props.banner.eventAt) : null,
 );
 
+// During SSR the browser timezone is unknown, so we render UTC and swap to
+// the user's local timezone once mounted. Both formats include timeZoneName
+// so the displayed timezone is always explicit — no layout shift needed.
+const isMounted = ref(false);
+
 const localTimeFormatted = computed(() => {
     if (!eventDate.value) return null;
     return new Intl.DateTimeFormat(undefined, {
@@ -21,6 +26,8 @@ const localTimeFormatted = computed(() => {
         day: "numeric",
         hour: "numeric",
         minute: "2-digit",
+        timeZoneName: "short",
+        ...(isMounted.value ? {} : { timeZone: "UTC" }),
     }).format(eventDate.value);
 });
 
@@ -79,6 +86,7 @@ function updateCountdown() {
 }
 
 onMounted(() => {
+    isMounted.value = true;
     if (eventDate.value) {
         updateCountdown();
         countdownInterval = setInterval(updateCountdown, 60000);
@@ -112,18 +120,24 @@ onUnmounted(() => {
         >
             <template v-if="eventDate">
                 <Tooltip>
-                    <span>{{ localTimeFormatted }} (your time)</span>
+                    <span>{{ localTimeFormatted }}</span>
+
                     <template #popper>
                         <div>{{ utcTimeFormatted }}</div>
+
                         <div>{{ estTimeFormatted }}</div>
                     </template>
                 </Tooltip>
+
                 <span>&middot;</span>
+
                 <span>{{ countdown }}</span>
             </template>
+
             <template v-if="eventDate && banner.detailsUrl">
                 <span>&middot;</span>
             </template>
+
             <a
                 v-if="banner.detailsUrl"
                 :href="banner.detailsUrl"
