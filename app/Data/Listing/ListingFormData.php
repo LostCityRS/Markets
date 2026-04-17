@@ -83,8 +83,8 @@ class ListingFormData extends Data
 
             'offers.*.items.*.quantity' => [
                 'required',
-                'integer',
-                'min:1',
+                'numeric',
+                'min:0.01',
             ],
             'type' => [
                 'required',
@@ -147,8 +147,8 @@ class ListingFormData extends Data
             'offers.*.items.*.item_id.exists' => 'One of the selected items is not available.',
 
             'offers.*.items.*.quantity.required' => 'Please enter a quantity for each item.',
-            'offers.*.items.*.quantity.integer' => 'Item quantity must be a whole number.',
-            'offers.*.items.*.quantity.min' => 'Item quantity must be at least 1.',
+            'offers.*.items.*.quantity.numeric' => 'Item quantity must be a number.',
+            'offers.*.items.*.quantity.min' => 'Item quantity must be at least 0.01.',
         ];
     }
 

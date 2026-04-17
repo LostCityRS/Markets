@@ -15,6 +15,8 @@ class ListingOfferItem extends Model
 
     protected $fillable = ['listing_offer_id', 'item_id', 'quantity'];
 
+    protected $casts = ['quantity' => 'float'];
+
     public function listingOffer(): BelongsTo
     {
         return $this->belongsTo(ListingOffer::class);
