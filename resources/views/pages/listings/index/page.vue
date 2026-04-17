@@ -2,12 +2,10 @@
 import { router, Head } from "@inertiajs/vue3";
 import { Tooltip } from "floating-vue";
 import "floating-vue/dist/style.css";
-import {
-    ArrowTrendingUpIcon,
-    ClockIcon,
-    PauseIcon,
-    PlayIcon,
-} from "@heroicons/vue/24/outline/index.js";
+import MkBump from "@/views/components/MkBump.vue";
+import MkPause from "@/views/components/MkPause.vue";
+import MkPlay from "@/views/components/MkPlay.vue";
+import MkClock from "@/views/components/MkClock.vue";
 import LayoutAccount from "@/views/layouts/account/layout-account.vue";
 
 const props = defineProps<Pages.ListingsIndexPage>();
@@ -50,7 +48,7 @@ const canBumpListings = computed(() =>
                             })
                         "
                     >
-                        <ArrowTrendingUpIcon class="size-5" /> Bump All
+                        <MkBump class="size-5" /> Bump All
                     </BaseButton>
 
                     <template #popper>
@@ -82,7 +80,7 @@ const canBumpListings = computed(() =>
                             })
                         "
                     >
-                        <PauseIcon class="size-5" /> Pause All
+                        <MkPause class="size-5" /> Pause All
                     </BaseButton>
 
                     <template #popper>
@@ -132,7 +130,7 @@ const canBumpListings = computed(() =>
             class="mb-4 flex flex-col justify-between gap-3 md:flex-row md:items-center"
         >
             <div class="flex gap-2">
-                <PauseIcon class="size-7 shrink-0 text-rose-500" />
+                <MkPause class="size-7 shrink-0 text-rose-500" />
 
                 <div>
                     <h2 class="text-xl font-semibold leading-none">
@@ -163,7 +161,7 @@ const canBumpListings = computed(() =>
                         })
                     "
                 >
-                    <PlayIcon class="size-5" /> Unpause All
+                    <MkPlay class="size-5" /> Unpause All
                 </BaseButton>
 
                 <template #popper>
@@ -205,7 +203,7 @@ const canBumpListings = computed(() =>
         <hr class="mb-5 mt-6 border-t-2 border-stone-700" />
 
         <div class="mb-4 flex gap-2">
-            <ClockIcon class="size-7 text-amber-400" />
+            <MkClock class="size-7 text-amber-400" />
 
             <div>
                 <h2 class="text-xl font-semibold leading-none">

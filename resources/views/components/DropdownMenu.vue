@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, nextTick, onMounted, onBeforeUnmount, computed } from "vue";
 import { Menu, MenuButton, MenuItems } from "@headlessui/vue";
-import { EllipsisVerticalIcon } from "@heroicons/vue/24/outline";
+import MkMenu from "@/views/components/MkMenu.vue";
 
 type Variant = "success" | "danger" | "secondary" | "warning" | "default";
 
@@ -63,7 +63,7 @@ onBeforeUnmount(() => {
             >
                 <!-- Named slot for icon. Fallback to default icon if not provided. -->
                 <slot name="icon">
-                    <EllipsisVerticalIcon class="size-5" aria-hidden="true" />
+                    <MkMenu class="size-5" aria-hidden="true" />
                 </slot>
             </MenuButton>
         </div>
