@@ -230,7 +230,7 @@ const links = computed(() => [
                     class="mt-4 flex flex-col items-center justify-between gap-4 border-2 border-stone-800 bg-stone-950 p-3 text-sm sm:flex-row"
                 >
                     <p class="flex gap-1">
-                        Built on the original source code from <span class="text-[#90c040]">BigShot</span> <HeartIcon class="size-5 text-red-500" />
+                        Built on the original source code from <a href="https://lostcity.rs/u/bigshot/summary" target="_blank" class="text-[#90c040] hover:underline">BigShot</a> <HeartIcon class="size-5 text-red-500" />
                     </p>
 
                     <a
