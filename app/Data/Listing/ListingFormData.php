@@ -102,8 +102,8 @@ class ListingFormData extends Data
                         ->where('id', '!=', request('id'))
                         ->count();
 
-                    if ($existingListings >= 8) {
-                        $fail('You cannot have more than eight listings of the same type.');
+                    if ($existingListings >= 12) {
+                        $fail('You cannot have more than twelve listings of the same type.');
                     }
                 },
                 function ($attribute, $value, $fail) {
