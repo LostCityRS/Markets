@@ -25,7 +25,7 @@ const buttonClasses = computed(() => {
             return "inline-flex justify-center rounded-sm bg-yellow-600 p-1 text-white hover:bg-yellow-500";
         case "default":
         default:
-            return "inline-flex justify-center rounded-sm bg-amber-300 p-1 text-amber-900 hover:bg-amber-400";
+            return "inline-flex justify-center rounded-sm bg-stone-900 p-1 hover:bg-stone-800";
     }
 });
 
