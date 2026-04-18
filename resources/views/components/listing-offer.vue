@@ -84,7 +84,7 @@ const updateQuantity = (index: number, value: number) => {
     const items = [...props.modelValue.items];
     if (!items[index]) return;
 
-    items[index].quantity = value < 1 ? 0 : value;
+    items[index].quantity = value < 0.01 ? 0 : value;
     emit("update:modelValue", { ...props.modelValue, items });
 };
 
