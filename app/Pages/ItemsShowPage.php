@@ -30,10 +30,10 @@ class ItemsShowPage extends Data
         public PaginatedDataCollection $listings,
 
         /**
-         * @var DataCollection<\App\Data\Listing\ListingData>
+         * @var PaginatedDataCollection<\App\Data\Listing\ListingData>
          */
         #[AutoLazy]
-        public ClosureLazy|DataCollection $soldListings,
+        public ClosureLazy|PaginatedDataCollection $soldListings,
 
         #[AutoLazy]
         public ClosureLazy|array $usernames,

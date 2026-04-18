@@ -42,23 +42,23 @@ class ItemController
             item: ClosureLazy::closure(fn () => ItemData::from($item)),
             listingForm: ClosureLazy::closure(fn () => $this->getListingFormData($item, $listingType)),
             listings: ListingData::collect($listings, PaginatedDataCollection::class),
-            soldListings: ClosureLazy::closure(fn () => ListingData::collect($this->getSoldListings($item), DataCollection::class)),
+            soldListings: ClosureLazy::closure(fn () => ListingData::collect($this->getSoldListings($item, (int) $request->input('sold_page', 1)), PaginatedDataCollection::class)),
             usernames: ClosureLazy::closure(fn () => UsernameService::getAuthenticatedUsernames()),
             banners: ClosureLazy::closure(fn () => BannerData::collect($item->banners()->active()->get(), DataCollection::class)),
         ));
     }
 
-    protected function getSoldListings(Item $item)
+    protected function getSoldListings(Item $item, int $page = 1)
     {
         return cache()->remember(
-            "item_{$item->id}_sold_listings",
+            "item_{$item->id}_sold_listings_p{$page}",
             now()->addMinutes(30),
             fn () => $item->listings()
                 ->with('offers.items.item')
                 ->whereNotNull('sold_at')
                 ->orderBy('sold_at', 'desc')
-                ->take(10)
-                ->get()
+                ->paginate(perPage: 10, pageName: 'sold_page', page: $page)
+                ->withQueryString()
         );
     }
 

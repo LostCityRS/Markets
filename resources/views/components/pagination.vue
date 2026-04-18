@@ -32,9 +32,12 @@ function buildUrl(pageUrl?: string | null): string {
     const pageParams = new URLSearchParams(urlObj.search);
     const currentParams = new URLSearchParams(window.location.search);
 
-    // Copy current query params (except `page`) into page params so filters/sorts persist
+    // Copy current query params into page params so filters/sorts persist.
+    // Skip keys that are already set by pageUrl — those are the page-param for
+    // this paginator and must win. This lets multiple paginators coexist
+    // (e.g. `page` for active listings + `sold_page` for sold history).
     for (const [key, value] of currentParams.entries()) {
-        if (key === "page") continue;
+        if (pageParams.has(key)) continue;
         pageParams.set(key, value);
     }
 

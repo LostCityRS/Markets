@@ -308,10 +308,10 @@ onUnmounted(() => {
                     <h2 class="text-lg font-bold">Recently Sold:</h2>
                 </template>
 
-                <EmptyTableRow v-if="!soldListings.length" />
+                <EmptyTableRow v-if="!soldListings.data.length" />
 
                 <ListingTableRow
-                    v-for="l in soldListings"
+                    v-for="l in soldListings.data"
                     :key="l.id"
                     :listing="l"
                 >
@@ -329,6 +329,8 @@ onUnmounted(() => {
                     </template>
                 </ListingTableRow>
             </ListingTable>
+
+            <Pagination :data="soldListings" />
         </div>
     </LayoutMain>
 </template>
