@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { InformationCircleIcon, PlusIcon } from "@heroicons/vue/24/outline";
 const props = defineProps<Pages.FavoritesIndexPage>();
 
 const selectedItem = ref<Data.Item.ItemData | null>(null);
@@ -25,7 +24,7 @@ watch(selectedItem, (item) => {
 
         <Alert type="info">
             <div class="flex items-center gap-2">
-                <InformationCircleIcon class="size-6 shrink-0 text-sky-200" />
+                <MkInfo class="size-6 shrink-0" />
 
                 <p>
                     View listings of your favorite items by navigating to the
@@ -76,7 +75,7 @@ watch(selectedItem, (item) => {
         <hr class="mb-5 mt-6 border-t-2 border-stone-700" />
 
         <div class="mb-4 flex gap-2">
-            <PlusIcon class="size-7 text-green-400" />
+            <MkFavorite class="size-7 shrink-0" />
 
             <div>
                 <h2 class="text-xl font-semibold leading-none">

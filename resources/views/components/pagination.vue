@@ -2,11 +2,6 @@
 import { Link, usePage } from "@inertiajs/vue3";
 import { usePaginator } from "momentum-paginator";
 
-import {
-    ArrowLongLeftIcon,
-    ArrowLongRightIcon,
-} from "@heroicons/vue/24/outline/index.js";
-
 const props = defineProps<{
     data: Paginator<any>;
 }>();
@@ -122,7 +117,7 @@ const filteredPages = computed<PageItem[]>(() => {
                         : 'cursor-default text-stone-700',
                 ]"
             >
-                <ArrowLongLeftIcon class="size-5" />
+                <MkArrowLeft class="size-5" />
 
                 <span>Prev</span>
             </Component>
@@ -175,7 +170,7 @@ const filteredPages = computed<PageItem[]>(() => {
             >
                 <span>Next</span>
 
-                <ArrowLongRightIcon class="size-5" />
+                <MkArrowRight class="size-5" />
             </Component>
         </div>
     </nav>

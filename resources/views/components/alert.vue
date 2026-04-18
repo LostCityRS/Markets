@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { XMarkIcon } from "@heroicons/vue/24/outline";
-
 const props = defineProps<AlertProps>();
 
 interface AlertProps {
@@ -28,11 +26,8 @@ const closeAlert = () => {
 };
 
 const alertClasses = computed(() => {
-    const styles: Record<Enums.BannerType, string> = {
-        error: "border-red-800 bg-red-950 text-white",
-        success: "border-green-800 bg-green-950 text-white",
-        warning: "border-amber-800 bg-amber-950 text-white",
-        info: "border-sky-800 bg-sky-950 text-white",
+    const styles: Partial<Record<Enums.BannerType, string>> = {
+        info: "border-[#5d4d2f] bg-[#2a2418] text-yellow-100",
         default: "border-stone-800 bg-stone-950 text-white",
     };
     return styles[props.type || "default"];
@@ -47,11 +42,11 @@ const alertClasses = computed(() => {
     >
         <button
             v-if="id"
-            class="absolute right-0 top-0 p-1 text-white hover:text-gray-400"
+            class="absolute right-0 top-0 p-1 hover:opacity-70"
             aria-label="Close alert"
             @click="closeAlert"
         >
-            <XMarkIcon class="size-6" />
+            <MkRemove class="size-5" />
         </button>
 
         <h2 v-if="title" class="font-bold">{{ title }}</h2>

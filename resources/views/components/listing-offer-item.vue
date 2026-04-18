@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { XMarkIcon } from "@heroicons/vue/24/solid";
 import { Tooltip } from "floating-vue";
 import "floating-vue/dist/style.css";
 
@@ -76,10 +75,10 @@ const onInput = (e: Event) => {
         <Tooltip>
             <button
                 type="button"
-                class="text-red-400 hover:text-red-300"
+                class="hover:opacity-70"
                 @click="emit('remove')"
             >
-                <XMarkIcon class="size-4" />
+                <MkRemove class="size-4" />
             </button>
 
             <template #popper> Remove Item </template>

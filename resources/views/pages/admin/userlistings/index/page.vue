@@ -1,17 +1,13 @@
 <script setup lang="ts">
-import {
-    CheckIcon,
-    PauseIcon,
-    PencilSquareIcon,
-    PlayIcon,
-    XMarkIcon,
-    ClockIcon,
-    NoSymbolIcon,
-} from "@heroicons/vue/24/outline";
 import { Tooltip } from "floating-vue";
 import "floating-vue/dist/style.css";
 import { pickBy } from "lodash";
 import LayoutUser from "@/views/layouts/admin/layout-user.vue";
+import MkCheck from "@/views/components/MkCheck.vue";
+import MkRemove from "@/views/components/MkRemove.vue";
+import MkPause from "@/views/components/MkPause.vue";
+import MkPlay from "@/views/components/MkPlay.vue";
+import MkEdit from "@/views/components/MkEdit.vue";
 
 const props = defineProps<Pages.Admin.UserListingsIndexPage>();
 
@@ -70,7 +66,7 @@ const currentUrl = computed(() => {
                         "
                         as="link"
                     >
-                        <XMarkIcon class="size-4" />
+                        <MkRemove class="size-4" />
                     </BaseButton>
                 </div>
             </template>
@@ -130,45 +126,45 @@ const currentUrl = computed(() => {
 
                 <td>
                     <Tooltip>
-                        <CheckIcon
+                        <MkCheck
                             v-if="listing.status === 'Sold'"
-                            class="size-6 text-emerald-500"
+                            class="size-6"
                         />
 
                         <template #popper> Sold </template>
                     </Tooltip>
 
                     <Tooltip>
-                        <XMarkIcon
+                        <MkRemove
                             v-if="listing.status === 'Deleted'"
-                            class="size-6 text-red-500"
+                            class="size-6"
                         />
 
                         <template #popper> Deleted </template>
                     </Tooltip>
 
                     <Tooltip>
-                        <PauseIcon
+                        <MkPause
                             v-if="listing.status === 'Paused'"
-                            class="size-6 text-rose-500"
+                            class="size-6"
                         />
 
                         <template #popper> Paused </template>
                     </Tooltip>
 
                     <Tooltip>
-                        <ClockIcon
+                        <MkClock
                             v-if="listing.status === 'Expiring'"
-                            class="size-6 text-amber-500"
+                            class="size-6"
                         />
 
                         <template #popper> Expiring </template>
                     </Tooltip>
 
                     <Tooltip>
-                        <NoSymbolIcon
+                        <MkExpired
                             v-if="listing.status === 'Expired'"
-                            class="size-6 text-red-500"
+                            class="size-6 text-stone-400"
                         />
 
                         <template #popper> Expired </template>
@@ -214,7 +210,7 @@ const currentUrl = computed(() => {
                                         listing.status === 'Expiring') &&
                                     !listing.pausedAt
                                 "
-                                :icon="PauseIcon"
+                                :icon="MkPause"
                                 text-color="text-rose-500"
                                 @click="
                                     router.post(
@@ -233,7 +229,7 @@ const currentUrl = computed(() => {
                                     listing.status === 'Paused' &&
                                     listing.pausedAt
                                 "
-                                :icon="PlayIcon"
+                                :icon="MkPlay"
                                 text-color="text-emerald-500"
                                 @click="
                                     router.delete(
@@ -252,7 +248,7 @@ const currentUrl = computed(() => {
                                     listing.status === 'Active' ||
                                     listing.status === 'Expiring'
                                 "
-                                :icon="CheckIcon"
+                                :icon="MkCheck"
                                 text-color="text-green-500"
                                 @click="
                                     router.visit(
@@ -269,7 +265,7 @@ const currentUrl = computed(() => {
                             </DropdownItem>
 
                             <DropdownItem
-                                :icon="PencilSquareIcon"
+                                :icon="MkEdit"
                                 text-color="text-amber-500"
                                 @click="
                                     router.visit(
@@ -285,7 +281,7 @@ const currentUrl = computed(() => {
 
                             <DropdownItem
                                 v-if="listing.status !== 'Deleted'"
-                                :icon="XMarkIcon"
+                                :icon="MkRemove"
                                 text-color="text-red-500"
                                 @click="
                                     router.visit(

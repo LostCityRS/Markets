@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Head, usePoll } from "@inertiajs/vue3";
-import { BookmarkSlashIcon, BookmarkIcon } from "@heroicons/vue/24/solid";
 import { Tooltip } from "floating-vue";
 import "floating-vue/dist/style.css";
 
@@ -131,7 +130,7 @@ onUnmounted(() => {
                             <Tooltip>
                                 <button
                                     v-if="!item.isFavorite"
-                                    class="inline-flex justify-center rounded-sm bg-emerald-800 p-2 text-emerald-200 hover:bg-emerald-700 sm:p-1"
+                                    class="inline-flex items-center justify-center rounded-sm bg-stone-900 p-2 hover:bg-stone-800 sm:p-1"
                                     @click="
                                         router.post(
                                             route('favorites.store', {
@@ -141,7 +140,7 @@ onUnmounted(() => {
                                         )
                                     "
                                 >
-                                    <BookmarkIcon
+                                    <MkFavorite
                                         class="size-5"
                                         aria-hidden="true"
                                     />
@@ -149,7 +148,7 @@ onUnmounted(() => {
 
                                 <button
                                     v-if="item.isFavorite"
-                                    class="inline-flex justify-center rounded-sm bg-red-800 p-2 text-red-200 hover:bg-red-700 sm:p-1"
+                                    class="inline-flex items-center justify-center rounded-sm bg-stone-900 p-2 hover:bg-stone-800 sm:p-1"
                                     @click="
                                         router.delete(
                                             route('favorites.destroy', {
@@ -159,7 +158,7 @@ onUnmounted(() => {
                                         )
                                     "
                                 >
-                                    <BookmarkSlashIcon
+                                    <MkRemove
                                         class="size-5"
                                         aria-hidden="true"
                                     />

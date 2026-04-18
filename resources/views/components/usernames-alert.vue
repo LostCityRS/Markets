@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { ExclamationTriangleIcon } from "@heroicons/vue/24/outline";
-
 const auth = useAuth();
 </script>
 
 <template>
     <Alert type="error" class="gap-3">
         <h2 class="flex gap-2 font-bold">
-            <ExclamationTriangleIcon class="size-6 text-red-300" />
+            <MkWarning class="size-6" />
 
             You Have No Usernames Linked
         </h2>
