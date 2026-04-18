@@ -29,15 +29,20 @@ const initialTz =
     timezones[0];
 form.timezone = initialTz.value;
 
-const submitRoute = props.bannerForm.id
+const isEdit = !!props.bannerForm.id;
+const submitRoute = isEdit
     ? route("admin.banners.update", { id: props.bannerForm.id })
     : route("admin.banners.store");
 
-const submitMethod = props.bannerForm.id ? "put" : "post";
 const pageTitle = computed(() => `${form.id ? "Edit" : "Create"} Banner`);
 
+// Always POST with forceFormData — PHP cannot parse multipart/form-data bodies
+// on PUT/PATCH, so use Laravel method spoofing via `_method` for updates.
 const submit = () => {
-    form[submitMethod ?? "post"](submitRoute, {
+    const target = isEdit
+        ? form.transform((data) => ({ ...data, _method: "put" }))
+        : form;
+    target.post(submitRoute, {
         preserveScroll: true,
         forceFormData: true,
         onSuccess: () => {
