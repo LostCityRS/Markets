@@ -40,10 +40,6 @@ class ListingPolicy
             return false;
         }
 
-        if (!is_null($listing->sold_at)) {
-            return false;
-        }
-
         return $user->id === $listing->user_id;
     }
 

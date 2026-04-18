@@ -25,10 +25,11 @@ const currentUrl = computed(() => {
 </script>
 
 <template>
-    <td v-if="listing.canManage && !listing.soldAt" class="sm:px-1">
+    <td v-if="listing.canManage" class="sm:px-1">
         <div class="flex flex-nowrap justify-end gap-1">
             <DropdownMenu>
                 <DropdownItem
+                    v-if="!listing.soldAt"
                     :icon="MkBump"
                     text-color="text-amber-400"
                     @click="
@@ -44,7 +45,7 @@ const currentUrl = computed(() => {
                 </DropdownItem>
 
                 <DropdownItem
-                    v-if="!listing.pausedAt"
+                    v-if="!listing.soldAt && !listing.pausedAt"
                     :icon="MkPause"
                     text-color="text-rose-500"
                     @click="
@@ -60,7 +61,7 @@ const currentUrl = computed(() => {
                 </DropdownItem>
 
                 <DropdownItem
-                    v-else
+                    v-else-if="!listing.soldAt && listing.pausedAt"
                     :icon="MkPlay"
                     text-color="text-emerald-500"
                     @click="
@@ -76,6 +77,7 @@ const currentUrl = computed(() => {
                 </DropdownItem>
 
                 <DropdownItem
+                    v-if="!listing.soldAt"
                     :icon="MkCheck"
                     text-color="text-green-500"
                     @click="
@@ -104,6 +106,7 @@ const currentUrl = computed(() => {
                 </DropdownItem>
 
                 <DropdownItem
+                    v-if="!listing.soldAt"
                     :icon="MkRemove"
                     text-color="text-red-500"
                     @click="

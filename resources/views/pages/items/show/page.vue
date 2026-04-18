@@ -326,6 +326,8 @@ onUnmounted(() => {
                         />
 
                         <NoteTableData :listing="listing" />
+
+                        <ActionTableData :listing="listing" />
                     </template>
                 </ListingTableRow>
             </ListingTable>
