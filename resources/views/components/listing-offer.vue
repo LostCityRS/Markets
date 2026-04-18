@@ -1,11 +1,5 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, onMounted } from "vue";
-import {
-    PlusIcon,
-    XMarkIcon,
-    PencilIcon,
-    CheckIcon,
-} from "@heroicons/vue/24/solid";
 import ListingOfferItem from "./listing-offer-item.vue";
 import { Tooltip } from "floating-vue";
 import "floating-vue/dist/style.css";
@@ -142,10 +136,10 @@ const cancelEdit = () => {
             <Tooltip v-if="!isEditing">
                 <button
                     type="button"
-                    class="text-stone-400 hover:text-stone-300"
+                    class="hover:opacity-70"
                     @click="toggleEdit"
                 >
-                    <PencilIcon class="size-4" />
+                    <MkEdit class="size-4" />
                 </button>
 
                 <template #popper> Edit Title </template>
@@ -168,7 +162,7 @@ const cancelEdit = () => {
                 <div class="flex items-center">
                     <Tooltip>
                         <BaseButton variant="success" @click="openSelect">
-                            <PlusIcon class="size-4" />
+                            <MkFavorite class="size-4" />
                         </BaseButton>
 
                         <template #popper> Add Item</template>
@@ -190,7 +184,7 @@ const cancelEdit = () => {
 
                     <Tooltip>
                         <BaseButton variant="danger" @click="closeSelect">
-                            <XMarkIcon class="size-4" />
+                            <MkRemove class="size-4" />
                         </BaseButton>
 
                         <template #popper> Cancel</template>

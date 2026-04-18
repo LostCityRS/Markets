@@ -1,14 +1,9 @@
 <script setup lang="ts">
 import { Tooltip } from "floating-vue";
 import "floating-vue/dist/style.css";
-import {
-    PlusIcon,
-    CheckCircleIcon,
-    XCircleIcon,
-    MegaphoneIcon,
-    PencilSquareIcon,
-    XMarkIcon,
-} from "@heroicons/vue/24/outline";
+import MkEdit from "@/views/components/MkEdit.vue";
+import MkRemove from "@/views/components/MkRemove.vue";
+import MkCheck from "@/views/components/MkCheck.vue";
 
 const props = defineProps<Pages.Admin.BannersIndexPage>();
 </script>
@@ -21,8 +16,6 @@ const props = defineProps<Pages.Admin.BannersIndexPage>();
             class="flex flex-col justify-between gap-3 md:flex-row md:items-center"
         >
             <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <MegaphoneIcon class="size-12 text-stone-400" />
-
                 <div>
                     <h1 class="text-2xl font-semibold">Manage Banners</h1>
 
@@ -39,7 +32,7 @@ const props = defineProps<Pages.Admin.BannersIndexPage>();
                 :href="route('admin.banners.create')"
                 class="flex items-center gap-1"
             >
-                <PlusIcon class="size-5" />
+                <MkCheck class="size-4" />
                 Create Banner
             </BaseButton>
         </div>
@@ -98,11 +91,11 @@ const props = defineProps<Pages.Admin.BannersIndexPage>();
 
                 <td>
                     <div v-if="banner.isActive">
-                        <CheckCircleIcon class="size-5 text-green-500" />
+                        <MkCheck class="size-5" />
                     </div>
 
                     <div v-else>
-                        <XCircleIcon class="size-5 text-red-500" />
+                        <MkRemove class="size-5" />
                     </div>
                 </td>
 
@@ -147,7 +140,7 @@ const props = defineProps<Pages.Admin.BannersIndexPage>();
                 <td>
                     <DropdownMenu>
                         <DropdownItem
-                            :icon="PencilSquareIcon"
+                            :icon="MkEdit"
                             text-color="text-amber-500"
                             :href="
                                 route('admin.banners.edit', { id: banner.id })
@@ -157,7 +150,7 @@ const props = defineProps<Pages.Admin.BannersIndexPage>();
                         </DropdownItem>
 
                         <DropdownItem
-                            :icon="XMarkIcon"
+                            :icon="MkRemove"
                             text-color="text-red-500"
                             @click="
                                 router.delete(

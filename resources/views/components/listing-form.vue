@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useForm } from "@inertiajs/vue3";
 import { computed, ref, nextTick } from "vue";
-import { XMarkIcon, PlusIcon } from "@heroicons/vue/24/solid";
 import { Tooltip } from "floating-vue";
 
 const props = defineProps<{
@@ -236,10 +235,10 @@ const submit = () => {
                                 <Tooltip>
                                     <BaseButton
                                         variant="custom"
-                                        class="flex h-fit items-center gap-1 bg-stone-800 !px-3 text-sm text-red-500"
+                                        class="flex h-fit items-center gap-1 bg-stone-800 !px-3 text-sm"
                                         @click="removeOffer(offerIndex)"
                                     >
-                                        <XMarkIcon class="size-4" />
+                                        <MkRemove class="size-4" />
                                     </BaseButton>
 
                                     <template #popper> Remove Offer </template>
@@ -263,7 +262,7 @@ const submit = () => {
                             class="my-2 flex size-fit items-center gap-1 text-sm"
                             @click="addOffer"
                         >
-                            <PlusIcon class="size-4" />
+                            <MkFavorite class="size-4" />
                             Add Another Offer
                         </BaseButton>
                     </div>
