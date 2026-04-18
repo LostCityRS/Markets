@@ -19,22 +19,33 @@ class UpdateItems extends Command
         $json = file_get_contents(storage_path('app/private/obj.json'));
         $newItems = $this->mapToItemSchema(json_decode($json, true));
 
+        // game_id >= 1_000_000 is reserved for synthetic items (sets). obj.json
+        // never produces IDs that high, but guard anyway so a bad import can't
+        // clobber a set row.
+        $setGameIds = DB::table('items')->where('is_set', true)->pluck('game_id')->all();
+
         foreach ($newItems as $newItem) {
+            if (in_array($newItem['game_id'], $setGameIds, true)) {
+                continue;
+            }
+
             $oldItem = null;
 
             foreach ($oldItems as $item) {
                 if ($item['game_id'] === $newItem['game_id']) {
                     $oldItem = $item;
+
                     continue;
                 }
             }
 
             if ($oldItem === null) {
-                if (!str_contains($newItem['slug'], 'unidentified')) {
+                if (! str_contains($newItem['slug'], 'unidentified')) {
 
                     $this->info("Adding new item: {$newItem['slug']}");
                     DB::table('items')->upsert($newItem, ['game_id']);
                 }
+
                 continue;
             }
 
@@ -44,7 +55,7 @@ class UpdateItems extends Command
                 DB::table('items')->where('game_id', $newItem['game_id'])->update(['is_listable' => $newItem['is_listable']]);
             }
 
-            if ($newItem['cost'] <> $oldItem['cost']) {
+            if ($newItem['cost'] != $oldItem['cost']) {
 
                 $this->info("Updating item: {$newItem['slug']}");
                 DB::table('items')->upsert($newItem, ['game_id']);

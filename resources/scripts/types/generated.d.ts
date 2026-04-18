@@ -72,7 +72,9 @@ game_id: number;
 name: string;
 slug: string;
 cost: number;
+isSet: boolean;
 banners: Array<Data.Banner.BannerData> | null;
+setComponents: Array<Data.Item.ItemSetComponentData> | null;
 };
 export type ItemFormData = {
 id: number;
@@ -80,6 +82,10 @@ game_id: number;
 name: string;
 slug: string;
 cost: number;
+};
+export type ItemSetComponentData = {
+quantity: number;
+item: Data.Item.ItemFormData;
 };
 }
 declare namespace Data.Listing {

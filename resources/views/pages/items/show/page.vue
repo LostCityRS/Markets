@@ -221,6 +221,8 @@ onUnmounted(() => {
                 </div>
             </div>
 
+            <ItemSetComponents :item="item" />
+
             <div>
                 <div class="relative z-10 mb-[-2px] flex flex-row">
                     <Link

@@ -21,6 +21,7 @@ declare module 'vue' {
     ItemImage: typeof import('./../../views/components/item-image.vue')['default']
     ItemSearch: typeof import('./../../views/components/item-search.vue')['default']
     ItemSelect: typeof import('./../../views/components/item-select.vue')['default']
+    ItemSetComponents: typeof import('./../../views/components/item-set-components.vue')['default']
     ItemTableData: typeof import('./../../views/components/listings-table/item-table-data.vue')['default']
     LayoutAccount: typeof import('@/views/layouts/account/layout-account.vue')['default']
     LayoutAdmin: typeof import('@/views/layouts/admin/layout-admin.vue')['default']
