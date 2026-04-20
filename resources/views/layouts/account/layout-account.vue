@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { UserIcon, Bars3Icon } from "@heroicons/vue/24/outline";
+
 const links = [
     {
         name: "Account Info",
@@ -31,7 +33,7 @@ const isCurrentRoute = (matchingRoutes: any) => {
     <LayoutMain>
         <div class="flex flex-row gap-x-4 gap-y-6 sm:flex-col">
             <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <MkUser class="size-12" />
+                <UserIcon class="size-12 text-stone-400" />
 
                 <div>
                     <p class="text-2xl font-semibold">My Account</p>
@@ -59,7 +61,7 @@ const isCurrentRoute = (matchingRoutes: any) => {
 
                 <DropdownMenu variant="secondary" class="block sm:hidden">
                     <template #icon>
-                        <MkMenu class="size-7" />
+                        <Bars3Icon class="size-7" />
                     </template>
 
                     <DropdownItem

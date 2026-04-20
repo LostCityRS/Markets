@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Bars3Icon } from "@heroicons/vue/24/outline";
+
 const links = [
     {
         name: "Users",
@@ -63,7 +65,7 @@ const isCurrentRoute = (matchingRoutes: any) => {
 
                 <DropdownMenu variant="secondary" class="block sm:hidden">
                     <template #icon>
-                        <MkMenu class="size-6" />
+                        <Bars3Icon class="size-6" />
                     </template>
 
                     <DropdownItem

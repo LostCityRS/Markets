@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ShareIcon } from "@heroicons/vue/24/outline";
+
 const props = defineProps<Pages.ReferralsIndexPage>();
 </script>
 
@@ -7,7 +9,7 @@ const props = defineProps<Pages.ReferralsIndexPage>();
         <Head title="Referrals" />
 
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <MkShare class="size-12" />
+            <ShareIcon class="size-12 text-emerald-500" />
 
             <div>
                 <h1 class="text-2xl font-semibold">Referrals</h1>

@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { HeartIcon, ChevronDownIcon } from "@heroicons/vue/24/solid/index.js";
+import {
+    UserIcon,
+    PresentationChartLineIcon,
+    BookmarkIcon,
+    ArrowLeftStartOnRectangleIcon,
+} from "@heroicons/vue/24/outline/index.js";
 import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { Modal } from "momentum-modal";
 import chainImage from "@/img/assets/edge_chain.jpg";
-import MkUser from "@/views/components/MkUser.vue";
-import MkFavorite from "@/views/components/MkFavorite.vue";
-import MkEdit from "@/views/components/MkEdit.vue";
-import MkRemove from "@/views/components/MkRemove.vue";
 
 const page = usePage();
 const auth = useAuth();
@@ -143,7 +145,7 @@ const links = computed(() => [
                             </template>
 
                             <DropdownItem
-                                :icon="MkUser"
+                                :icon="UserIcon"
                                 text-color="text-stone-200"
                                 :href="route('account')"
                             >
@@ -151,7 +153,7 @@ const links = computed(() => [
                             </DropdownItem>
 
                             <DropdownItem
-                                :icon="MkEdit"
+                                :icon="PresentationChartLineIcon"
                                 text-color="text-amber-400"
                                 :href="route('listings.index')"
                             >
@@ -159,7 +161,7 @@ const links = computed(() => [
                             </DropdownItem>
 
                             <DropdownItem
-                                :icon="MkFavorite"
+                                :icon="BookmarkIcon"
                                 text-color="text-emerald-500"
                                 :href="route('favorites.index')"
                             >
@@ -167,7 +169,7 @@ const links = computed(() => [
                             </DropdownItem>
 
                             <DropdownItem
-                                :icon="MkRemove"
+                                :icon="ArrowLeftStartOnRectangleIcon"
                                 text-color="text-red-500"
                                 @click="
                                     router.delete(

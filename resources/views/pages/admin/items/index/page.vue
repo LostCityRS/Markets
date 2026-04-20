@@ -1,6 +1,12 @@
 <script setup lang="ts">
+import {
+    BuildingStorefrontIcon,
+    XMarkIcon,
+    PencilSquareIcon,
+    CheckCircleIcon,
+    XCircleIcon,
+} from "@heroicons/vue/24/outline";
 import { pickBy } from "lodash";
-import MkEdit from "@/views/components/MkEdit.vue";
 
 const props = defineProps<Pages.Admin.ItemsIndexPage>();
 
@@ -25,7 +31,7 @@ const submitFilter = () => {
         <Head title="Manage Items" />
 
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <MkPhoto class="size-12" />
+            <BuildingStorefrontIcon class="size-12 text-stone-400" />
 
             <div>
                 <h1 class="text-2xl font-semibold">Manage Items</h1>
@@ -91,7 +97,7 @@ const submitFilter = () => {
                         :href="route('admin.items.index', { reset: 1 })"
                         as="link"
                     >
-                        <MkRemove class="size-4" />
+                        <XMarkIcon class="size-4" />
                     </BaseButton>
                 </div>
             </template>
@@ -128,11 +134,11 @@ const submitFilter = () => {
 
                 <td class="w-0">
                     <div v-if="item.isActive">
-                        <MkCheck class="size-5" />
+                        <CheckCircleIcon class="size-5 text-green-500" />
                     </div>
 
                     <div v-else>
-                        <MkRemove class="size-5" />
+                        <XCircleIcon class="size-5 text-red-500" />
                     </div>
                 </td>
 
@@ -145,7 +151,7 @@ const submitFilter = () => {
                 <td class="text-end">
                     <DropdownMenu>
                         <DropdownItem
-                            :icon="MkEdit"
+                            :icon="PencilSquareIcon"
                             text-color="text-amber-500"
                             @click="
                                 router.visit(

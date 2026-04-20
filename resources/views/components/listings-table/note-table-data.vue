@@ -2,6 +2,7 @@
 import { Menu, MenuButton, MenuItems } from "@headlessui/vue";
 import { Tooltip } from "floating-vue";
 import "floating-vue/dist/style.css";
+import { ChatBubbleBottomCenterIcon } from "@heroicons/vue/24/solid/index.js";
 
 defineProps<{
     listing: Data.Listing.ListingData;
@@ -24,9 +25,9 @@ defineProps<{
             <Menu as="div" class="relative inline-block sm:hidden">
                 <div>
                     <MenuButton
-                        class="inline-flex justify-center rounded-sm p-1 hover:opacity-70"
+                        class="inline-flex justify-center rounded-sm p-1 text-stone-400 hover:text-stone-600"
                     >
-                        <MkChat class="size-5" />
+                        <ChatBubbleBottomCenterIcon class="size-5" />
                     </MenuButton>
                 </div>
 

@@ -1,4 +1,13 @@
 <script setup lang="ts">
+import {
+    UserIcon,
+    Bars3Icon,
+    ArrowLeftIcon,
+    ArrowUturnLeftIcon,
+    XMarkIcon,
+    KeyIcon,
+    FaceFrownIcon,
+} from "@heroicons/vue/24/outline";
 
 const props = defineProps<{
     selectedUser: Data.User.AdminUserData;
@@ -41,11 +50,11 @@ const isCurrentRoute = (matchingRoutes: any) => {
                         class="flex w-fit items-center gap-1 rounded-sm bg-stone-800 px-3 py-1 text-white hover:bg-stone-700"
                         :href="route('admin.users.index')"
                     >
-                        <MkArrowLeft class="size-5" />
+                        <ArrowLeftIcon class="size-5" />
                         Back
                     </Link>
 
-                    <MkUser class="size-12" />
+                    <UserIcon class="size-12 text-stone-400" />
 
                     <div>
                         <p class="text-2xl font-semibold">
@@ -75,7 +84,7 @@ const isCurrentRoute = (matchingRoutes: any) => {
                             )
                         "
                     >
-                        <MkRemove class="size-5" />
+                        <XMarkIcon class="size-5" />
                         Ban User
                     </button>
 
@@ -92,7 +101,7 @@ const isCurrentRoute = (matchingRoutes: any) => {
                             )
                         "
                     >
-                        <MkCheck class="size-5" />
+                        <ArrowUturnLeftIcon class="size-5" />
                         Unban User
                     </button>
 
@@ -109,7 +118,7 @@ const isCurrentRoute = (matchingRoutes: any) => {
                             )
                         "
                     >
-                        <MkFavorite class="size-5" />
+                        <KeyIcon class="size-5" />
                         Promote to Admin
                     </button>
 
@@ -126,7 +135,7 @@ const isCurrentRoute = (matchingRoutes: any) => {
                             )
                         "
                     >
-                        <MkWarning class="size-5" />
+                        <FaceFrownIcon class="size-5" />
                         Demote to Noob
                     </button>
                 </div>
@@ -149,7 +158,7 @@ const isCurrentRoute = (matchingRoutes: any) => {
 
                 <DropdownMenu variant="secondary" class="block sm:hidden">
                     <template #icon>
-                        <MkMenu class="size-7" />
+                        <Bars3Icon class="size-7" />
                     </template>
 
                     <DropdownItem

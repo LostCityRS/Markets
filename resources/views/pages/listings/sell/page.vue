@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { CheckIcon } from "@heroicons/vue/24/outline";
 import { Tooltip } from "floating-vue";
+import { PlusIcon, XMarkIcon } from "@heroicons/vue/24/solid";
 
 const props = defineProps<Pages.ListingsSalePage>();
 
@@ -89,7 +91,7 @@ const submit = (close: () => void) => {
 
             <form class="flex flex-col gap-4" @submit.prevent="submit(close)">
                 <div class="flex items-center gap-2">
-                    <MkCheck class="size-7" />
+                    <CheckIcon class="size-7 text-green-500" />
 
                     <h3 class="text-xl font-semibold">
                         Mark
@@ -199,10 +201,10 @@ const submit = (close: () => void) => {
                                 <Tooltip>
                                     <BaseButton
                                         variant="custom"
-                                        class="flex h-fit items-center gap-1 bg-stone-800 !px-3 text-sm"
+                                        class="flex h-fit items-center gap-1 bg-stone-800 !px-3 text-sm text-red-500"
                                         @click="removeOffer(offerIndex)"
                                     >
-                                        <MkRemove class="size-4" />
+                                        <XMarkIcon class="size-4" />
                                     </BaseButton>
 
                                     <template #popper> Remove Offer</template>
@@ -226,7 +228,7 @@ const submit = (close: () => void) => {
                         class="my-2 flex size-fit items-center gap-1 text-sm"
                         @click="addOffer"
                     >
-                        <MkFavorite class="size-4" />
+                        <PlusIcon class="size-4" />
                         Add Another Offer
                     </BaseButton>
                 </div>

@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import {
+    XMarkIcon,
+    ArrowUturnLeftIcon,
+    ArrowLeftIcon,
+} from "@heroicons/vue/24/outline";
+
 const props = defineProps<Pages.UsersIndexPage>();
 const auth = useAuth();
 
@@ -20,7 +26,7 @@ const back = () => {
             class="mb-4 flex w-fit items-center gap-1 rounded-sm bg-stone-800 px-3 py-1 text-white hover:bg-stone-700"
             @click="back()"
         >
-            <MkArrowLeft class="size-5" />
+            <ArrowLeftIcon class="size-5" />
             Back
         </button>
 
@@ -47,7 +53,7 @@ const back = () => {
                                 )
                             "
                         >
-                            <MkRemove class="size-5" /> Ban User
+                            <XMarkIcon class="size-5" /> Ban User
                         </button>
                     </template>
 
@@ -64,7 +70,7 @@ const back = () => {
                                 )
                             "
                         >
-                            <MkCheck class="size-5" /> Unban User
+                            <ArrowUturnLeftIcon class="size-5" /> Unban User
                         </button>
                     </template>
                 </div>

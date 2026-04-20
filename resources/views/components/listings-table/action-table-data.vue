@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { Tooltip } from "floating-vue";
 import "floating-vue/dist/style.css";
-import MkBump from "@/views/components/MkBump.vue";
-import MkPause from "@/views/components/MkPause.vue";
-import MkPlay from "@/views/components/MkPlay.vue";
-import MkCheck from "@/views/components/MkCheck.vue";
-import MkEdit from "@/views/components/MkEdit.vue";
-import MkRemove from "@/views/components/MkRemove.vue";
+import {
+    PencilSquareIcon,
+    ArrowTrendingUpIcon,
+    CheckIcon,
+    XMarkIcon,
+    PauseIcon,
+    PlayIcon,
+} from "@heroicons/vue/24/outline/index.js";
 
 const props = defineProps<{
     listing: Data.Listing.ListingData;
@@ -30,7 +32,7 @@ const currentUrl = computed(() => {
             <DropdownMenu>
                 <DropdownItem
                     v-if="!listing.soldAt"
-                    :icon="MkBump"
+                    :icon="ArrowTrendingUpIcon"
                     text-color="text-amber-400"
                     @click="
                         router.patch(
@@ -46,7 +48,7 @@ const currentUrl = computed(() => {
 
                 <DropdownItem
                     v-if="!listing.soldAt && !listing.pausedAt"
-                    :icon="MkPause"
+                    :icon="PauseIcon"
                     text-color="text-rose-500"
                     @click="
                         router.post(
@@ -62,7 +64,7 @@ const currentUrl = computed(() => {
 
                 <DropdownItem
                     v-else-if="!listing.soldAt && listing.pausedAt"
-                    :icon="MkPlay"
+                    :icon="PlayIcon"
                     text-color="text-emerald-500"
                     @click="
                         router.delete(
@@ -78,7 +80,7 @@ const currentUrl = computed(() => {
 
                 <DropdownItem
                     v-if="!listing.soldAt"
-                    :icon="MkCheck"
+                    :icon="CheckIcon"
                     text-color="text-green-500"
                     @click="
                         router.visit(
@@ -94,7 +96,7 @@ const currentUrl = computed(() => {
                 </DropdownItem>
 
                 <DropdownItem
-                    :icon="MkEdit"
+                    :icon="PencilSquareIcon"
                     text-color="text-amber-500"
                     @click="
                         router.visit(route('listings.edit', { listing }), {
@@ -107,7 +109,7 @@ const currentUrl = computed(() => {
 
                 <DropdownItem
                     v-if="!listing.soldAt"
-                    :icon="MkRemove"
+                    :icon="XMarkIcon"
                     text-color="text-red-500"
                     @click="
                         router.visit(

@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { EyeIcon, UsersIcon, XMarkIcon } from "@heroicons/vue/24/outline";
 import { Tooltip } from "floating-vue";
 import { pickBy } from "lodash";
-import MkInfo from "@/views/components/MkInfo.vue";
 
 const props = defineProps<Pages.Admin.UsersIndexPage>();
 
@@ -26,7 +26,7 @@ const submitFilter = () => {
         <Head title="Manage Users" />
 
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <MkUsers class="size-12" />
+            <UsersIcon class="size-12 text-stone-400" />
 
             <div>
                 <h1 class="text-2xl font-semibold">Manage Users</h1>
@@ -94,7 +94,7 @@ const submitFilter = () => {
                         :href="route('admin.users.index', { reset: 1 })"
                         as="link"
                     >
-                        <MkRemove class="size-4" />
+                        <XMarkIcon class="size-4" />
                     </BaseButton>
                 </div>
             </template>
@@ -161,7 +161,7 @@ const submitFilter = () => {
                 <td>
                     <DropdownMenu>
                         <DropdownItem
-                            :icon="MkInfo"
+                            :icon="EyeIcon"
                             text-color="text-amber-500"
                             :href="route('admin.users.show', { id: user.id })"
                         >

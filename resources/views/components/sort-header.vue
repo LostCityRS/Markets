@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/vue/24/outline";
 import { computed } from "vue";
 
 interface Props {
@@ -61,11 +62,11 @@ const computedHref = computed(() => {
         <slot></slot>
 
         <span v-if="sortOrder === 'asc'">
-            <MkArrowUp class="size-4" />
+            <ArrowUpIcon class="size-4" />
         </span>
 
         <span v-else-if="sortOrder === 'desc'">
-            <MkArrowDown class="size-4" />
+            <ArrowDownIcon class="size-4" />
         </span>
     </Link>
 </template>

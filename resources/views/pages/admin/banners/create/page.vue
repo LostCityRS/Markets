@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ArrowLeftIcon, PhotoIcon } from "@heroicons/vue/24/outline";
 import VueMarkdown from "vue-markdown-render";
 import { Cropper } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
@@ -10,7 +11,13 @@ const form = useForm({
     remove_banner_image: false,
 });
 
-const bannerTypes = computed((): Enums.BannerType[] => ["default", "info"]);
+const bannerTypes = computed((): Enums.BannerType[] => [
+    "default",
+    "info",
+    "warning",
+    "error",
+    "success",
+]);
 
 const display_scopes = computed((): Enums.BannerDisplayScope[] => [
     "global",
@@ -161,7 +168,7 @@ const removeBannerImage = () => {
                     :href="route('admin.banners.index')"
                     class="flex items-center gap-1"
                 >
-                    <MkArrowLeft class="size-5" />
+                    <ArrowLeftIcon class="size-5" />
                     Back
                 </BaseButton>
 
@@ -407,7 +414,7 @@ const removeBannerImage = () => {
                         for="banner_image_upload"
                         class="flex cursor-pointer items-center gap-2 rounded border-2 border-dashed border-stone-600 p-4 text-stone-400 hover:border-stone-500 hover:text-stone-300"
                     >
-                        <MkPhoto class="size-6" />
+                        <PhotoIcon class="size-6" />
                         Upload banner image
                     </label>
 

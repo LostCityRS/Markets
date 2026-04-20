@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { EyeIcon } from "@heroicons/vue/24/outline";
 import { Tooltip } from "floating-vue";
 import { pickBy } from "lodash";
 import LayoutUser from "@/views/layouts/admin/layout-user.vue";

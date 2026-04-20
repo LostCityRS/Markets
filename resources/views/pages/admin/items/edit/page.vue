@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { Head } from "@inertiajs/vue3";
+import { PencilIcon } from "@heroicons/vue/24/outline";
 
 const props = defineProps<Pages.Admin.ItemsEditPage>();
 
@@ -48,7 +49,7 @@ const submit = (close: () => void) => {
             <Head title="Edit Item" />
 
             <div class="flex items-center gap-2">
-                <MkEdit class="size-7" />
+                <PencilIcon class="size-7 text-amber-500" />
 
                 <h1 class="text-xl font-semibold">Edit Item</h1>
             </div>

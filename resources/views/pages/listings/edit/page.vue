@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head } from "@inertiajs/vue3";
+import { PencilIcon } from "@heroicons/vue/24/outline";
 
 const props = defineProps<Pages.ListingsEditPage>();
 
@@ -21,7 +22,7 @@ const back = () => {
             <UsernamesAlert v-if="auth && !listingForm?.usernames?.length" />
 
             <div class="flex items-center gap-2">
-                <MkEdit class="size-7" />
+                <PencilIcon class="size-7 text-amber-500" />
 
                 <h1 class="text-xl font-semibold">Update Listing</h1>
             </div>

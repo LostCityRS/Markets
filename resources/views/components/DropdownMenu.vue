@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, nextTick, onMounted, onBeforeUnmount, computed } from "vue";
 import { Menu, MenuButton, MenuItems } from "@headlessui/vue";
-import MkMenu from "@/views/components/MkMenu.vue";
+import { EllipsisVerticalIcon } from "@heroicons/vue/24/outline";
 
 type Variant = "success" | "danger" | "secondary" | "warning" | "default";
 
@@ -25,7 +25,7 @@ const buttonClasses = computed(() => {
             return "inline-flex justify-center rounded-sm bg-yellow-600 p-1 text-white hover:bg-yellow-500";
         case "default":
         default:
-            return "inline-flex justify-center rounded-sm bg-stone-900 p-1 hover:bg-stone-800";
+            return "inline-flex justify-center rounded-sm bg-amber-300 p-1 text-amber-900 hover:bg-amber-400";
     }
 });
 
@@ -63,7 +63,7 @@ onBeforeUnmount(() => {
             >
                 <!-- Named slot for icon. Fallback to default icon if not provided. -->
                 <slot name="icon">
-                    <MkMenu class="size-5" aria-hidden="true" />
+                    <EllipsisVerticalIcon class="size-5" aria-hidden="true" />
                 </slot>
             </MenuButton>
         </div>

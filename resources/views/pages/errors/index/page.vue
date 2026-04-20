@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import MkWarning from "@/views/components/MkWarning.vue";
-import MkInfo from "@/views/components/MkInfo.vue";
-import MkPause from "@/views/components/MkPause.vue";
+import {
+    MegaphoneIcon,
+    ExclamationTriangleIcon,
+    MagnifyingGlassIcon,
+    LockClosedIcon,
+    ArrowLongLeftIcon,
+} from "@heroicons/vue/24/outline";
 
 interface Props {
     status: number;
@@ -32,11 +36,11 @@ const description = computed(() => {
 const iconComponent = computed(() => {
     return (
         {
-            503: MkWarning,
-            500: MkWarning,
-            404: MkInfo,
-            403: MkPause,
-        }[status.value] || MkWarning
+            503: MegaphoneIcon,
+            500: ExclamationTriangleIcon,
+            404: MagnifyingGlassIcon,
+            403: LockClosedIcon,
+        }[status.value] || ExclamationTriangleIcon
     );
 });
 
@@ -72,7 +76,7 @@ const back = () => {
                 class="flex w-fit items-center gap-2 rounded-sm bg-green-800 px-3 py-2 text-white hover:bg-green-700"
                 @click="back()"
             >
-                <MkArrowLeft class="size-5" />
+                <ArrowLongLeftIcon class="size-5" />
                 Go Back
             </button>
         </div>

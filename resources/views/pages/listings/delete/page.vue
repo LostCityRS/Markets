@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { XMarkIcon, CheckIcon } from "@heroicons/vue/24/outline";
+
 const props = defineProps<Pages.ListingsDeletePage>();
 
 const typeVerb = computed(() => {
@@ -20,7 +22,7 @@ const submit = (close: () => void) => {
 
             <div class="flex flex-col gap-4">
                 <div class="flex items-center gap-2">
-                    <MkRemove class="size-7" />
+                    <XMarkIcon class="size-7 text-red-500" />
 
                     <h1 class="text-xl font-semibold">Remove Listing</h1>
                 </div>
@@ -51,7 +53,7 @@ const submit = (close: () => void) => {
                         class="flex items-center gap-1"
                         @click="submit(close)"
                     >
-                        <MkRemove class="size-5" />
+                        <XMarkIcon class="size-5" />
 
                         Remove
                     </BaseButton>
@@ -70,7 +72,7 @@ const submit = (close: () => void) => {
                             )
                         "
                     >
-                        <MkCheck class="size-5" />
+                        <CheckIcon class="size-5" />
 
                         Mark {{ typeVerb }}
                     </BaseButton>

@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import {
+    ArrowLeftEndOnRectangleIcon,
+    BookmarkSlashIcon,
+    Cog6ToothIcon,
+} from "@heroicons/vue/24/outline";
+
 const props = defineProps<Pages.HomeIndexPage>();
 const auth = useAuth();
 
@@ -224,7 +230,7 @@ onUnmounted(() => {
                         preserve-scroll
                         class="flex items-center gap-1 text-[#90c040] hover:underline"
                     >
-                        <MkEdit class="size-5" />
+                        <Cog6ToothIcon class="size-5" />
 
                         <span class="hidden sm:inline">Manage</span>
 
@@ -237,7 +243,7 @@ onUnmounted(() => {
                 v-if="!auth && props.tab === 'favorites'"
                 class="flex flex-col items-center justify-center gap-2 px-2 py-6 sm:flex-row"
             >
-                <MkUser class="size-12" />
+                <ArrowLeftEndOnRectangleIcon class="size-12 text-stone-500" />
 
                 <div class="text-center sm:text-left">
                     <p class="text-lg font-semibold">
@@ -261,7 +267,7 @@ onUnmounted(() => {
                 "
                 class="flex flex-col items-center justify-center gap-2 px-2 py-6 sm:flex-row"
             >
-                <MkFavorite class="size-12" />
+                <BookmarkSlashIcon class="size-12 text-stone-500" />
 
                 <div class="text-center sm:text-left">
                     <p class="text-lg font-semibold">
@@ -269,7 +275,7 @@ onUnmounted(() => {
                     </p>
 
                     <p class="text-stone-300">
-                        Add items to your favorites by clicking the star
+                        Add items to your favorites by clicking the bookmark
                         icon on a listing.
                     </p>
                 </div>
