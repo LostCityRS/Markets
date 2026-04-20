@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link, router } from "@inertiajs/vue3";
+import { Link, usePage } from "@inertiajs/vue3";
 import { usePaginator } from "momentum-paginator";
 
 const props = defineProps<{
@@ -7,155 +7,174 @@ const props = defineProps<{
 }>();
 const { first, last, previous, next, pages } = usePaginator(props.data);
 
-const meta = computed(() => (props.data as any).meta);
-const currentPage = computed(() => meta.value?.current_page ?? 1);
-const lastPage = computed(() => meta.value?.last_page ?? 1);
+// Local types to narrow the pages union
+type RawPage = {
+    url?: string | null;
+    label: string;
+    isActive?: boolean;
+    isPrevious?: boolean;
+    isNext?: boolean;
+    isCurrent?: boolean;
+    isSeparator?: boolean;
+};
 
-const jumpPage = ref<number | string>(currentPage.value);
-watch(currentPage, (n) => {
-    jumpPage.value = n;
-});
+type EllipsisItem = { label: "..."; isPage: false };
+type PageItem = (RawPage & { isPage: true }) | EllipsisItem;
 
-// Find which query param this paginator uses (`page`, `sold_page`, etc.)
-// by matching a page link's URL param value against its label.
-function getPageParamName(): string {
-    const known = pages.find(
-        (p) => p.url && p.label && !Number.isNaN(Number(p.label)),
-    );
-    if (!known?.url) return "page";
-    const url = new URL(known.url, window.location.origin);
-    for (const [key, value] of url.searchParams.entries()) {
-        if (value === String(known.label)) return key;
-    }
-    return "page";
-}
+const visibleRange = 2; // Number of pages to show on either side of current page
 
-// Merge current query params (filters/sort) into the page url so they persist
-// across navigation. Skip keys the pageUrl already sets — those are the
-// page-param for this paginator and must win. This lets multiple paginators
-// coexist (e.g. `page` + `sold_page`).
+// Helper: merge current query params (filters/sort) into the page url
 function buildUrl(pageUrl?: string | null): string {
     if (!pageUrl) return "#";
+
+    // Create absolute URL from possibly-relative pageUrl
     const urlObj = new URL(pageUrl, window.location.origin);
     const pageParams = new URLSearchParams(urlObj.search);
     const currentParams = new URLSearchParams(window.location.search);
+
+    // Copy current query params into page params so filters/sorts persist.
+    // Skip keys that are already set by pageUrl — those are the page-param for
+    // this paginator and must win. This lets multiple paginators coexist
+    // (e.g. `page` for active listings + `sold_page` for sold history).
     for (const [key, value] of currentParams.entries()) {
         if (pageParams.has(key)) continue;
         pageParams.set(key, value);
     }
+
     const qs = pageParams.toString();
     return urlObj.pathname + (qs ? `?${qs}` : "");
 }
 
-function jumpTo() {
-    const n = Number(jumpPage.value);
-    if (!Number.isFinite(n) || n < 1 || n > lastPage.value) {
-        jumpPage.value = currentPage.value;
-        return;
-    }
-    if (n === currentPage.value) return;
-    const paramName = getPageParamName();
-    const reference = pages.find((p) => p.url)?.url;
-    if (!reference) return;
-    const urlObj = new URL(reference, window.location.origin);
-    urlObj.searchParams.set(paramName, String(n));
-    router.visit(buildUrl(urlObj.pathname + urlObj.search), {
-        preserveScroll: true,
-    });
+// Type guard used after mapping to filter out nulls
+function isPageItem(val: PageItem | null): val is PageItem {
+    return val !== null;
 }
 
-function refresh() {
-    router.reload({ preserveScroll: true });
-}
+const filteredPages = computed<PageItem[]>(() => {
+    const currentPageLabel = pages.find((p) => p.isCurrent)?.label;
+    const currentPage = Number(currentPageLabel);
+    if (Number.isNaN(currentPage)) {
+        // No current page found - return all pages (mapped to isPage)
+        return pages.map((p) => ({ ...p, isPage: true })) as PageItem[];
+    }
+
+    const firstPageNumber = Number(pages[0]?.label);
+    const lastPageNumber = Number(pages[pages.length - 1]?.label);
+
+    const pageNumbers = pages
+        .map((p) => Number(p.label))
+        .filter((n) => !isNaN(n));
+
+    let filtered = pageNumbers.filter(
+        (num) =>
+            num === firstPageNumber || // Always show first page
+            num === lastPageNumber || // Always show last page
+            num === currentPage || // Always show current page
+            (num >= currentPage - visibleRange &&
+                num <= currentPage + visibleRange), // Show pages around current
+    );
+
+    // Insert ellipses where gaps exist
+    let result: (string | number)[] = [];
+    let prevNum: number | null = null;
+
+    for (let num of filtered) {
+        if (prevNum !== null && num - prevNum > 1) {
+            result.push("..."); // Add ellipsis if there's a gap
+        }
+        result.push(num);
+        prevNum = Number(num);
+    }
+
+    return result
+        .map((num) => {
+            if (num === "...")
+                return { label: "...", isPage: false } as EllipsisItem;
+            const page = pages.find((p) => Number(p.label) === Number(num));
+            return page
+                ? ({ ...(page as RawPage), isPage: true } as PageItem)
+                : null;
+        })
+        .filter(isPageItem); // Narrow type to PageItem[]
+});
 </script>
 
 <template>
     <nav
         v-if="props.data.data.length"
-        class="-mx-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 text-sm sm:mx-0 sm:px-0"
+        class="-mx-4 flex items-center justify-between px-4 sm:mx-0 sm:px-0"
     >
-        <ul class="flex flex-row flex-wrap items-center gap-x-3">
-            <li>
-                <Link
-                    v-if="first.isActive"
-                    :href="buildUrl(first.url)"
-                    class="text-[#90C040] hover:underline"
-                >
-                    &lt;&lt; first
-                </Link>
+        <div class="group">
+            <div
+                v-if="previous.isActive"
+                class="-mt-px h-px w-0 transition-[width] group-hover:w-full"
+            ></div>
 
-                <span v-else class="text-stone-600">&lt;&lt; first</span>
-            </li>
+            <Component
+                :is="previous.isActive ? Link : 'span'"
+                :href="buildUrl(previous.url)"
+                class="inline-flex items-center gap-3 py-3 text-sm font-bold transition"
+                :class="[
+                    previous.isActive
+                        ? 'text-white hover:text-stone-300'
+                        : 'cursor-default text-stone-700',
+                ]"
+            >
+                <MkArrowLeft class="size-5" />
 
-            <li>
-                <Link
-                    v-if="previous.isActive"
-                    :href="buildUrl(previous.url)"
-                    class="text-[#90C040] hover:underline"
-                >
-                    &lt; prev
-                </Link>
+                <span>Prev</span>
+            </Component>
+        </div>
 
-                <span v-else class="text-stone-600">&lt; prev</span>
-            </li>
+        <div class="hidden md:flex">
+            <div v-for="(page, index) in filteredPages" :key="index">
+                <!-- Page numbers -->
+                <div v-if="page.isPage" class="group">
+                    <div
+                        class="-mt-px h-px transition-[width]"
+                        :class="[
+                            page.isCurrent
+                                ? 'w-full'
+                                : 'w-0 group-hover:w-full',
+                        ]"
+                    ></div>
 
-            <li class="inline-flex items-center gap-x-1.5">
-                <span>Page</span>
+                    <Link
+                        :href="buildUrl(page.url)"
+                        class="block px-4 py-3 text-sm font-bold transition"
+                        :class="[
+                            page.isCurrent ? 'text-stone-500' : 'text-white',
+                        ]"
+                    >
+                        {{ page.label }}
+                    </Link>
+                </div>
 
-                <input
-                    v-model="jumpPage"
-                    type="text"
-                    size="2"
-                    maxlength="3"
-                    inputmode="numeric"
-                    class="w-10 border border-stone-700 bg-stone-900 px-1 py-0.5 text-center text-white focus:border-[#90C040] focus:outline-none"
-                    @keydown.enter="jumpTo"
-                    @blur="jumpTo"
-                />
+                <!-- Ellipsis when skipping pages -->
+                <div v-else class="px-3.5 py-3 text-sm font-bold">...</div>
+            </div>
+        </div>
 
-                <span>of {{ lastPage }}</span>
-            </li>
+        <div class="group">
+            <div
+                v-if="next.isActive"
+                class="-mt-px h-px w-0 transition-[width] group-hover:w-full"
+            ></div>
 
-            <li>
-                <Link
-                    v-if="next.isActive"
-                    :href="buildUrl(next.url)"
-                    class="text-[#90C040] hover:underline"
-                >
-                    next &gt;
-                </Link>
+            <Component
+                :is="next.isActive ? Link : 'span'"
+                :href="buildUrl(next.url)"
+                class="inline-flex items-center gap-3 py-3 text-sm font-bold transition"
+                :class="[
+                    next.isActive
+                        ? 'text-white hover:text-stone-400'
+                        : 'cursor-default text-stone-700',
+                ]"
+            >
+                <span>Next</span>
 
-                <span v-else class="text-stone-600">next &gt;</span>
-            </li>
-
-            <li>
-                <Link
-                    v-if="last.isActive"
-                    :href="buildUrl(last.url)"
-                    class="text-[#90C040] hover:underline"
-                >
-                    last &gt;&gt;
-                </Link>
-
-                <span v-else class="text-stone-600">last &gt;&gt;</span>
-            </li>
-        </ul>
-
-        <ul class="flex flex-row items-center gap-x-3">
-            <li>
-                <button
-                    type="button"
-                    class="inline-flex items-center gap-x-1 text-[#90C040] hover:underline"
-                    @click="refresh"
-                >
-                    <img
-                        src="/img/forum/refresh.gif"
-                        alt=""
-                        class="inline-block"
-                    />
-                    Refresh
-                </button>
-            </li>
-        </ul>
+                <MkArrowRight class="size-5" />
+            </Component>
+        </div>
     </nav>
 </template>
