@@ -33,6 +33,21 @@ class BumpController
         return back()->success('Listings bumped successfully');
     }
 
+    public function indexExpired()
+    {
+        $listings = $this->user->listings()
+            ->whereNull('sold_at')
+            ->whereNull('paused_at')
+            ->whereBetween('updated_at', [now()->subDays(7), now()->subDay()])
+            ->update(['updated_at' => now()]);
+
+        if ($listings === 0) {
+            return back()->error('No expired listings were found to bump');
+        }
+
+        return back()->success('Expired listings bumped successfully');
+    }
+
     public function update(Listing $listing)
     {
         $this->authorize('update', $listing);

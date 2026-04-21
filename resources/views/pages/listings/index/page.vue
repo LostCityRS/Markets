@@ -204,20 +204,56 @@ const canBumpListings = computed(() =>
 
         <hr class="mb-5 mt-6 border-t-2 border-stone-700" />
 
-        <div class="mb-4 flex gap-2">
-            <ClockIcon class="size-7 text-amber-400" />
+        <div
+            class="mb-4 flex flex-col justify-between gap-3 md:flex-row md:items-center"
+        >
+            <div class="flex gap-2">
+                <ClockIcon class="size-7 shrink-0 text-amber-400" />
 
-            <div>
-                <h2 class="text-xl font-semibold leading-none">
-                    Recently Expired
-                </h2>
+                <div>
+                    <h2 class="text-xl font-semibold leading-none">
+                        Recently Expired
+                    </h2>
 
-                <p class="text-stone-300">
-                    If you'd like to re-activate a listing, you can bump or edit
-                    it's information. Expired listings show up here for up to a
-                    week.
-                </p>
+                    <p class="text-stone-300">
+                        If you'd like to re-activate a listing, you can bump or
+                        edit it's information. Expired listings show up here
+                        for up to a week.
+                    </p>
+                </div>
             </div>
+
+            <Tooltip>
+                <BaseButton
+                    variant="custom"
+                    :class="
+                        [
+                            'flex h-fit items-center gap-1 whitespace-nowrap bg-stone-800 text-amber-400',
+                            !expiredListings.length
+                                ? 'cursor-not-allowed opacity-50'
+                                : 'hover:bg-stone-900',
+                        ].join(' ')
+                    "
+                    :disabled="!expiredListings.length"
+                    @click="
+                        router.patch(route('listings.bump.expired'), {
+                            preserveScroll: true,
+                        })
+                    "
+                >
+                    <ArrowTrendingUpIcon class="size-5" /> Bump All
+                </BaseButton>
+
+                <template #popper>
+                    <template v-if="!expiredListings.length">
+                        You have no expired listings to bump
+                    </template>
+
+                    <template v-else>
+                        Reactivate all expired listings
+                    </template>
+                </template>
+            </Tooltip>
         </div>
 
         <ListingTable class="border-yellow-900 bg-stone-950">

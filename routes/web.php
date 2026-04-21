@@ -53,6 +53,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('bump', [BumpController::class, 'index'])
         ->name('listings.bump');
 
+    Route::patch('bump/expired', [BumpController::class, 'indexExpired'])
+        ->name('listings.bump.expired');
+
     Route::patch('/bump/{listing}', [BumpController::class, 'update'])
         ->name('listing.bump');
 
