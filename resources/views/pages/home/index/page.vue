@@ -4,9 +4,30 @@ import {
     BookmarkSlashIcon,
     Cog6ToothIcon,
 } from "@heroicons/vue/24/outline";
+import {
+    Dialog,
+    DialogPanel,
+    DialogTitle,
+    TransitionChild,
+    TransitionRoot,
+} from "@headlessui/vue";
 
 const props = defineProps<Pages.HomeIndexPage>();
 const auth = useAuth();
+
+const BAN_DISMISS_KEY = "ban-notice-dismissed";
+const showBanNotice = ref(false);
+
+onMounted(() => {
+    if (auth.value?.is_banned && sessionStorage.getItem(BAN_DISMISS_KEY) !== "1") {
+        showBanNotice.value = true;
+    }
+});
+
+const dismissBanNotice = () => {
+    sessionStorage.setItem(BAN_DISMISS_KEY, "1");
+    showBanNotice.value = false;
+};
 
 const listings = ref<Data.Listing.ListingData[]>([...props.listings.data]);
 
@@ -122,6 +143,66 @@ onUnmounted(() => {
 
 <template>
     <LayoutMain>
+        <TransitionRoot appear :show="showBanNotice" as="template">
+            <Dialog as="div" class="relative z-50" @close="dismissBanNotice">
+                <TransitionChild
+                    as="template"
+                    enter="ease-out duration-200"
+                    enter-from="opacity-0"
+                    enter-to="opacity-100"
+                    leave="ease-in duration-150"
+                    leave-from="opacity-100"
+                    leave-to="opacity-0"
+                >
+                    <div class="fixed inset-0 bg-stone-950/70" />
+                </TransitionChild>
+
+                <div class="fixed inset-0 overflow-y-auto">
+                    <div class="flex min-h-full items-center justify-center p-4">
+                        <TransitionChild
+                            as="template"
+                            enter="ease-out duration-200"
+                            enter-from="opacity-0 scale-95"
+                            enter-to="opacity-100 scale-100"
+                            leave="ease-in duration-150"
+                            leave-from="opacity-100 scale-100"
+                            leave-to="opacity-0 scale-95"
+                        >
+                            <DialogPanel
+                                class="flex w-full max-w-lg flex-col gap-4 border-2 border-red-900 bg-stone-900 p-5 text-left"
+                            >
+                                <DialogTitle class="text-xl font-bold text-red-500">
+                                    You're banned.
+                                </DialogTitle>
+
+                                <div v-if="auth?.banned_reason" class="border-l-4 border-red-800 bg-stone-950/60 p-3">
+                                    <p class="text-sm font-semibold text-stone-400">Reason</p>
+
+                                    <p class="whitespace-pre-wrap text-stone-200">
+                                        {{ auth.banned_reason }}
+                                    </p>
+                                </div>
+
+                                <p class="text-stone-300">
+                                    Message <code class="rounded bg-stone-800 px-1.5 py-0.5 text-stone-100">redbracket</code> on Discord to appeal.
+                                </p>
+
+                                <div class="flex justify-end">
+                                    <button
+                                        type="button"
+                                        class="rounded-sm bg-stone-800 px-4 py-2 text-stone-100 hover:bg-stone-700"
+                                        @click="dismissBanNotice"
+                                    >
+                                        Dismiss
+                                    </button>
+                                </div>
+                            </DialogPanel>
+                        </TransitionChild>
+                    </div>
+                </div>
+            </Dialog>
+        </TransitionRoot>
+
         <ItemSearch />
 
         <div class="relative z-10 mb-[-2px] flex flex-row">

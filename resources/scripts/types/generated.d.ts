@@ -173,6 +173,8 @@ globalBanners: Array<Data.Banner.BannerData> | null;
 export type UserData = {
 name: string;
 is_admin: boolean;
+is_banned: boolean;
+banned_reason: string | null;
 };
 }
 declare namespace Data.User {
