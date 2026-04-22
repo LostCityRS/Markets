@@ -1,5 +1,7 @@
 # LostCity Market
 
+<img width="1624" height="1346" alt="image" src="https://github.com/user-attachments/assets/53875444-bd6e-4884-a695-36b6443f19ba" />
+
 A Laravel application with Inertia.js and Vue (TypeScript).
 
 ## Prerequisites
