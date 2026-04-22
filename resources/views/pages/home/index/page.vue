@@ -15,17 +15,9 @@ import {
 const props = defineProps<Pages.HomeIndexPage>();
 const auth = useAuth();
 
-const BAN_DISMISS_KEY = "ban-notice-dismissed";
-const showBanNotice = ref(false);
-
-onMounted(() => {
-    if (auth.value?.is_banned && sessionStorage.getItem(BAN_DISMISS_KEY) !== "1") {
-        showBanNotice.value = true;
-    }
-});
+const showBanNotice = ref(auth.value?.is_banned ?? false);
 
 const dismissBanNotice = () => {
-    sessionStorage.setItem(BAN_DISMISS_KEY, "1");
     showBanNotice.value = false;
 };
 
@@ -158,7 +150,9 @@ onUnmounted(() => {
                 </TransitionChild>
 
                 <div class="fixed inset-0 overflow-y-auto">
-                    <div class="flex min-h-full items-center justify-center p-4">
+                    <div
+                        class="flex min-h-full items-center justify-center p-4"
+                    >
                         <TransitionChild
                             as="template"
                             enter="ease-out duration-200"
@@ -171,20 +165,36 @@ onUnmounted(() => {
                             <DialogPanel
                                 class="flex w-full max-w-lg flex-col gap-4 border-2 border-red-900 bg-stone-900 p-5 text-left"
                             >
-                                <DialogTitle class="text-xl font-bold text-red-500">
+                                <DialogTitle
+                                    class="text-xl font-bold text-red-500"
+                                >
                                     You're banned.
                                 </DialogTitle>
 
-                                <div v-if="auth?.banned_reason" class="border-l-4 border-red-800 bg-stone-950/60 p-3">
-                                    <p class="text-sm font-semibold text-stone-400">Reason</p>
+                                <div
+                                    v-if="auth?.banned_reason"
+                                    class="border-l-4 border-red-800 bg-stone-950/60 p-3"
+                                >
+                                    <p
+                                        class="text-sm font-semibold text-stone-400"
+                                    >
+                                        Reason
+                                    </p>
 
-                                    <p class="whitespace-pre-wrap text-stone-200">
+                                    <p
+                                        class="whitespace-pre-wrap text-stone-200"
+                                    >
                                         {{ auth.banned_reason }}
                                     </p>
                                 </div>
 
                                 <p class="text-stone-300">
-                                    Message <code class="rounded bg-stone-800 px-1.5 py-0.5 text-stone-100">redbracket</code> on Discord to appeal.
+                                    Message
+                                    <code
+                                        class="rounded bg-stone-800 px-1.5 py-0.5 text-stone-100"
+                                        >redbracket</code
+                                    >
+                                    on Discord to appeal.
                                 </p>
 
                                 <div class="flex justify-end">
