@@ -2,6 +2,7 @@
 const page = usePage();
 
 const currentTab = computed(() => {
+    if (page.url.startsWith("/sales")) return "sales";
     if (page.url.startsWith("/stats")) return "stats";
 
     const url = new URL(page.url, "http://placeholder");
@@ -26,16 +27,22 @@ const tabs = computed(() => [
         href: "/?tab=sell",
     },
     {
-        key: "favorites",
-        label: "Favorites",
-        mobileLabel: "Favorites",
-        href: "/?tab=favorites",
+        key: "sales",
+        label: "Recent Sales",
+        mobileLabel: "Sales",
+        href: route("sales.index"),
     },
     {
         key: "stats",
         label: "Stats",
         mobileLabel: "Stats",
         href: route("stats.index"),
+    },
+    {
+        key: "favorites",
+        label: "Favorites",
+        mobileLabel: "Favorites",
+        href: "/?tab=favorites",
     },
 ]);
 </script>
