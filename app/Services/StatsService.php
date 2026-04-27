@@ -19,6 +19,9 @@ class StatsService
 {
     private const COINS_GAME_ID = 995;
 
+    /** Oracle window: how many of an item's most recent coin-priced sales feed its average. */
+    private const ORACLE_RECENT_TRADES = 7;
+
     public function getStatsPage(): StatsPage
     {
         $cacheKey = 'stats_index_'.now()->utc()->toDateString();
@@ -39,9 +42,9 @@ class StatsService
 
     protected function topVolume(): DataCollection
     {
-        $rows = $this->baseListingsWithCoinPrice()
-            ->selectRaw('listings.item_id, SUM(COALESCE(listings.price, lcp.coin_price) * listings.quantity) AS value')
-            ->whereRaw('COALESCE(listings.price, lcp.coin_price) IS NOT NULL')
+        $rows = $this->baseListingsWithValue()
+            ->selectRaw('listings.item_id, SUM(vl.coin_price * listings.quantity) AS value')
+            ->where('vl.coin_price', '>', 0)
             ->groupBy('listings.item_id')
             ->orderByDesc('value')
             ->limit(10)
@@ -52,9 +55,16 @@ class StatsService
 
     protected function topExpensiveItems(): DataCollection
     {
-        $rows = $this->baseListingsWithCoinPrice()
-            ->selectRaw('listings.item_id, MAX(COALESCE(listings.price, lcp.coin_price)) AS value')
-            ->whereRaw('COALESCE(listings.price, lcp.coin_price) IS NOT NULL')
+        // No 24h cutoff here — quiet rares (e.g. partyhats) shouldn't drop off this
+        // board just because nobody traded one today.
+        $rows = DB::table('listings')
+            ->join('items', 'items.id', '=', 'listings.item_id')
+            ->joinSub($this->valuedListingsJoin(), 'vl', 'vl.listing_id', '=', 'listings.id')
+            ->whereNull('listings.deleted_at')
+            ->whereNotNull('listings.sold_at')
+            ->where('items.is_active', 1)
+            ->where('vl.coin_price', '>', 0)
+            ->selectRaw('listings.item_id, MAX(vl.coin_price) AS value')
             ->groupBy('listings.item_id')
             ->orderByDesc('value')
             ->limit(10)
@@ -81,8 +91,8 @@ class StatsService
 
     protected function topExpensiveTrades(): DataCollection
     {
-        $listings = $this->soldListingsWithCoinPriceQuery()
-            ->orderByRaw('COALESCE(listings.price, lcp.coin_price) * listings.quantity DESC')
+        $listings = $this->soldListingsWithValueQuery()
+            ->orderByRaw('vl.coin_price * listings.quantity DESC')
             ->limit(10)
             ->get();
 
@@ -111,9 +121,9 @@ class StatsService
         $excludedItemIds = FeaturedItem::where('featured_at', '>=', now()->subDays(60))
             ->pluck('item_id');
 
-        $candidate = $this->soldListingsWithCoinPriceQuery()
+        $candidate = $this->soldListingsWithValueQuery()
             ->whereNotIn('listings.item_id', $excludedItemIds)
-            ->orderByRaw('COALESCE(listings.price, lcp.coin_price) * listings.quantity DESC')
+            ->orderByRaw('vl.coin_price * listings.quantity DESC')
             ->first();
 
         if (! $candidate) {
@@ -143,10 +153,10 @@ class StatsService
     }
 
     /**
-     * Per-listing coin price: the highest coin total across the listing's offers,
-     * because alternative offers are joined by "OR" and the buyer/seller picked one.
+     * Per-listing coin-only price: SUM of coin offer-items per offer, then MAX across offers.
+     * Used to feed the oracle (only "real" coin sales contribute, no recursion).
      */
-    protected function coinPriceJoin(): QueryBuilder
+    protected function coinOnlyPricePerListing(): QueryBuilder
     {
         $perOffer = DB::table('listing_offers as lo')
             ->join('listing_offer_items as loi', 'loi.listing_offer_id', '=', 'lo.id')
@@ -161,11 +171,54 @@ class StatsService
             ->selectRaw('per_offer.listing_id, MAX(per_offer.coin_total) AS coin_price');
     }
 
-    protected function baseListingsWithCoinPrice(): QueryBuilder
+    /**
+     * Per-item price oracle: AVG of an item's most recent N coin-priced sale prices.
+     * Items with zero coin-priced sales get no row (LEFT JOIN -> NULL -> 0 contribution).
+     */
+    protected function priceOracle(): QueryBuilder
+    {
+        $ranked = DB::table('listings as l')
+            ->joinSub($this->coinOnlyPricePerListing(), 'cpl', 'cpl.listing_id', '=', 'l.id')
+            ->whereNotNull('l.sold_at')
+            ->whereNull('l.deleted_at')
+            ->select(
+                'l.item_id',
+                'cpl.coin_price',
+                DB::raw('ROW_NUMBER() OVER (PARTITION BY l.item_id ORDER BY l.sold_at DESC, l.id DESC) AS rn'),
+            );
+
+        return DB::query()
+            ->fromSub($ranked, 'ranked')
+            ->where('ranked.rn', '<=', self::ORACLE_RECENT_TRADES)
+            ->groupBy('ranked.item_id')
+            ->selectRaw('ranked.item_id, AVG(ranked.coin_price) AS avg_price');
+    }
+
+    /**
+     * Per-listing valuation: each offer item is valued via the oracle (coins = 1 gp each;
+     * other items = oracle avg, or 0 if the item has never sold for coins). Per offer
+     * we sum valued contributions, then take MAX across alternative offers ("OR" branches).
+     */
+    protected function valuedListingsJoin(): QueryBuilder
+    {
+        $valuedOffers = DB::table('listing_offers as lo')
+            ->join('listing_offer_items as loi', 'loi.listing_offer_id', '=', 'lo.id')
+            ->join('items as ii', 'ii.id', '=', 'loi.item_id')
+            ->leftJoinSub($this->priceOracle(), 'oracle', 'oracle.item_id', '=', 'loi.item_id')
+            ->groupBy('lo.id', 'lo.listing_id')
+            ->selectRaw('lo.listing_id, SUM(loi.quantity * CASE WHEN ii.game_id = '.self::COINS_GAME_ID.' THEN 1 ELSE COALESCE(oracle.avg_price, 0) END) AS offer_total');
+
+        return DB::query()
+            ->fromSub($valuedOffers, 'valued_offer')
+            ->groupBy('valued_offer.listing_id')
+            ->selectRaw('valued_offer.listing_id, MAX(valued_offer.offer_total) AS coin_price');
+    }
+
+    protected function baseListingsWithValue(): QueryBuilder
     {
         return DB::table('listings')
             ->join('items', 'items.id', '=', 'listings.item_id')
-            ->leftJoinSub($this->coinPriceJoin(), 'lcp', 'lcp.listing_id', '=', 'listings.id')
+            ->joinSub($this->valuedListingsJoin(), 'vl', 'vl.listing_id', '=', 'listings.id')
             ->whereNull('listings.deleted_at')
             ->where('listings.sold_at', '>=', now()->subDay())
             ->where('items.is_active', 1);
@@ -174,16 +227,16 @@ class StatsService
     /**
      * @return \Illuminate\Database\Eloquent\Builder<Listing>
      */
-    protected function soldListingsWithCoinPriceQuery()
+    protected function soldListingsWithValueQuery()
     {
         return Listing::query()
             ->with('item')
-            ->leftJoinSub($this->coinPriceJoin(), 'lcp', 'lcp.listing_id', '=', 'listings.id')
+            ->joinSub($this->valuedListingsJoin(), 'vl', 'vl.listing_id', '=', 'listings.id')
             ->whereNotNull('listings.sold_at')
             ->where('listings.sold_at', '>=', now()->subDay())
             ->whereHas('item', fn ($q) => $q->where('is_active', true))
-            ->whereRaw('COALESCE(listings.price, lcp.coin_price) IS NOT NULL')
-            ->select('listings.*', DB::raw('COALESCE(listings.price, lcp.coin_price) AS coin_price'));
+            ->where('vl.coin_price', '>', 0)
+            ->select('listings.*', DB::raw('vl.coin_price AS coin_price'));
     }
 
     protected function hydrateStatItems($rows): DataCollection
@@ -209,10 +262,10 @@ class StatsService
 
     protected function makeTradeData(Listing $listing): StatTradeData
     {
-        $coinPrice = $listing->coin_price ?? $listing->price ?? $this->coinPriceForListing($listing);
+        $coinPrice = $listing->coin_price ?? $this->valueForListing($listing);
 
-        if ($coinPrice === null) {
-            throw new \LogicException("Listing {$listing->id} has no coin price for trade-data hydration.");
+        if ($coinPrice === null || $coinPrice <= 0) {
+            throw new \LogicException("Listing {$listing->id} has no priceable offer for trade-data hydration.");
         }
 
         $coinPrice = (int) $coinPrice;
@@ -228,19 +281,27 @@ class StatsService
         );
     }
 
-    protected function coinPriceForListing(Listing $listing): ?int
+    /**
+     * Compute a single listing's valued price on demand (used when loading a featured-item
+     * row's listing without going through the leaderboard query).
+     */
+    protected function valueForListing(Listing $listing): ?int
     {
-        $maxCoin = DB::table('listing_offers as lo')
+        $row = DB::table('listing_offers as lo')
             ->join('listing_offer_items as loi', 'loi.listing_offer_id', '=', 'lo.id')
-            ->join('items as ci', 'ci.id', '=', 'loi.item_id')
+            ->join('items as ii', 'ii.id', '=', 'loi.item_id')
+            ->leftJoinSub($this->priceOracle(), 'oracle', 'oracle.item_id', '=', 'loi.item_id')
             ->where('lo.listing_id', $listing->id)
-            ->where('ci.game_id', self::COINS_GAME_ID)
             ->groupBy('lo.id')
-            ->selectRaw('SUM(loi.quantity) AS offer_total')
+            ->selectRaw('SUM(loi.quantity * CASE WHEN ii.game_id = '.self::COINS_GAME_ID.' THEN 1 ELSE COALESCE(oracle.avg_price, 0) END) AS offer_total')
             ->orderByDesc('offer_total')
             ->limit(1)
-            ->value('offer_total');
+            ->first();
 
-        return $maxCoin !== null ? (int) $maxCoin : null;
+        if (! $row || $row->offer_total <= 0) {
+            return null;
+        }
+
+        return (int) $row->offer_total;
     }
 }

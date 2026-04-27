@@ -25,21 +25,49 @@ function makeStatsItem(array $overrides = []): Item
     ], $overrides));
 }
 
+/**
+ * Create a sold listing. By convention the legacy `listings.price` column is left null
+ * and the coin price is encoded as a "For each item:" offer with a Coins offer-item
+ * (matches how the production sale form persists trades).
+ *
+ * Pass `'price' => N` to set the coin price per unit (default 100).
+ * Pass `'price' => null` to skip creating any offer (item-for-item set up by the caller).
+ */
 function makeSoldListing(Item $item, array $overrides = []): Listing
 {
-    return Listing::factory()->create(array_merge([
+    $coinPrice = array_key_exists('price', $overrides) ? $overrides['price'] : 100;
+    unset($overrides['price']);
+
+    $listing = Listing::factory()->create(array_merge([
         'item_id' => $item->id,
         'sold_at' => now()->subHours(1),
-        'price' => 100,
+        'price' => null,
         'quantity' => 1,
         'username' => 'tester',
     ], $overrides));
+
+    if ($coinPrice !== null) {
+        attachCoinOffer($listing, $coinPrice);
+    }
+
+    return $listing;
 }
 
 /**
- * Production-style sold listing: price IS NULL, the coin amount lives in a ListingOffer
- * with a ListingOfferItem pointing at the Coins item (game_id 995). Pass an array of
- * coin amounts to create multiple alternative offers (joined by "OR" in the UI).
+ * Attach a single "For each item:" offer with a coin offer-item to an existing listing.
+ */
+function attachCoinOffer(Listing $listing, int $coinPricePerUnit): void
+{
+    $coins = Item::where('game_id', 995)->firstOrFail();
+    $offer = $listing->offers()->create(['title' => 'For each item:']);
+    $offer->items()->create([
+        'item_id' => $coins->id,
+        'quantity' => $coinPricePerUnit,
+    ]);
+}
+
+/**
+ * Create a sold listing with multiple alternative coin offers (joined by "OR" in the UI).
  *
  * @param  array<int, int>  $offerCoinAmounts
  */
@@ -47,17 +75,28 @@ function makeSoldListingWithCoinOffers(Item $item, array $offerCoinAmounts, arra
 {
     $listing = makeSoldListing($item, array_merge(['price' => null], $overrides));
 
-    $coins = Item::where('game_id', 995)->firstOrFail();
-
     foreach ($offerCoinAmounts as $coinAmount) {
-        $offer = $listing->offers()->create(['title' => 'For each item:']);
-        $offer->items()->create([
-            'item_id' => $coins->id,
-            'quantity' => $coinAmount,
-        ]);
+        attachCoinOffer($listing, $coinAmount);
     }
 
     return $listing;
+}
+
+/**
+ * Attach an item-for-item offer to a listing. $offerItems is a list of [Item, quantity] pairs
+ * that all belong to a single offer (so the buyer pays all of them per unit of the listing).
+ *
+ * @param  array<int, array{0: Item, 1: int|float}>  $offerItems
+ */
+function attachItemOffer(Listing $listing, array $offerItems): void
+{
+    $offer = $listing->offers()->create(['title' => 'For each item:']);
+    foreach ($offerItems as [$offerItem, $quantity]) {
+        $offer->items()->create([
+            'item_id' => $offerItem->id,
+            'quantity' => $quantity,
+        ]);
+    }
 }
 
 it('orders top volume by SUM(price * quantity) descending', function () {
@@ -440,47 +479,6 @@ it('home page exposes a link to /stats', function () {
     expect(route('stats.index'))->toEndWith('/stats');
 });
 
-it('uses coin offer-items as the price when listings.price is null', function () {
-    $a = makeStatsItem();
-
-    // Coin price is encoded as a ListingOfferItem of Coins (game_id 995),
-    // which is how the production sale form persists trades.
-    makeSoldListingWithCoinOffers($a, [200], ['quantity' => 100]);
-
-    $this->get(route('stats.index'))
-        ->assertInertia(fn (AssertableInertia $page) => $page
-            ->has('topVolume', 1)
-            ->where('topVolume.0.item.id', $a->id)
-            ->where('topVolume.0.value', 20000)
-            ->has('topExpensiveItems', 1)
-            ->where('topExpensiveItems.0.item.id', $a->id)
-            ->where('topExpensiveItems.0.value', 200)
-            ->has('topExpensiveTrades', 1)
-            ->where('topExpensiveTrades.0.item.id', $a->id)
-            ->where('topExpensiveTrades.0.price', 200)
-            ->where('topExpensiveTrades.0.total', 20000)
-        );
-});
-
-it('mixes legacy listings.price and offer-coins listings in the same leaderboards', function () {
-    $a = makeStatsItem();
-    $b = makeStatsItem();
-
-    // Legacy: price set on the listing row directly. Total = 100 × 50 = 5_000.
-    makeSoldListing($a, ['price' => 100, 'quantity' => 50]);
-    // Modern: price encoded via a coin offer item. Total = 300 × 100 = 30_000.
-    makeSoldListingWithCoinOffers($b, [300], ['quantity' => 100]);
-
-    $this->get(route('stats.index'))
-        ->assertInertia(fn (AssertableInertia $page) => $page
-            ->has('topVolume', 2)
-            ->where('topVolume.0.item.id', $b->id)
-            ->where('topVolume.0.value', 30000)
-            ->where('topVolume.1.item.id', $a->id)
-            ->where('topVolume.1.value', 5000)
-        );
-});
-
 it('picks the MAX coin amount across alternative offers on the same listing', function () {
     $a = makeStatsItem();
 
@@ -496,51 +494,114 @@ it('picks the MAX coin amount across alternative offers on the same listing', fu
         );
 });
 
-it('still excludes listings whose only offer is non-coin items', function () {
-    $a = makeStatsItem();
-    $b = makeStatsItem();
+it('values an item-for-item trade via the per-item price oracle', function () {
+    // Yellow Phat has 1 prior coin sale at 600M gp/unit.
+    // Ranger boots have 1 prior coin sale at 50M gp/unit.
+    // Red Phat is sold for 1 Yellow Phat + 1 Ranger boots → valued at 650M.
+    $yellowPhat = makeStatsItem();
+    $rangerBoots = makeStatsItem();
+    $redPhat = makeStatsItem();
 
-    // Item A: pure item-for-item — a single offer with a non-coin item.
-    $listingA = makeSoldListing($a, ['price' => null, 'quantity' => 5]);
-    $tradeItem = makeStatsItem();
-    $offerA = $listingA->offers()->create(['title' => 'For each item:']);
-    $offerA->items()->create([
-        'item_id' => $tradeItem->id,
-        'quantity' => 1,
-    ]);
+    makeSoldListing($yellowPhat, ['price' => 600_000_000, 'sold_at' => now()->subHours(2)]);
+    makeSoldListing($rangerBoots, ['price' => 50_000_000, 'sold_at' => now()->subHours(2)]);
 
-    // Item B: coin offer, present in price-based stats.
-    makeSoldListingWithCoinOffers($b, [100], ['quantity' => 1]);
+    $itemForItem = makeSoldListing($redPhat, ['price' => null, 'quantity' => 1]);
+    attachItemOffer($itemForItem, [[$yellowPhat, 1], [$rangerBoots, 1]]);
 
     $this->get(route('stats.index'))
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->has('topVolume', 1)
-            ->where('topVolume.0.item.id', $b->id)
-            ->has('topExpensiveItems', 1)
-            ->where('topExpensiveItems.0.item.id', $b->id)
-            ->has('topExpensiveTrades', 1)
-            ->where('topExpensiveTrades.0.item.id', $b->id)
-            // Both listings still count toward topTraded (which ignores price).
-            ->has('topTraded', 2)
+            ->where('topExpensiveTrades.0.item.id', $redPhat->id)
+            ->where('topExpensiveTrades.0.total', 650_000_000)
         );
 });
 
-it('selects the featured item from offer-coin listings when none have listings.price set', function () {
-    $a = makeStatsItem();
-    $b = makeStatsItem();
+it('values hybrid offers (coins plus an item) as the sum of both contributions', function () {
+    // Yellow Phat oracle = 1000 gp.
+    // Red Phat is sold for "100 gp + 1 Yellow Phat per unit" → valued at 100 + 1000 = 1100.
+    $yellowPhat = makeStatsItem();
+    $redPhat = makeStatsItem();
 
-    // Item A trade: 100 gp × 10 = 1_000 total.
-    makeSoldListingWithCoinOffers($a, [100], ['quantity' => 10]);
-    // Item B trade: 500 gp × 10 = 5_000 total — should win.
-    makeSoldListingWithCoinOffers($b, [500], ['quantity' => 10]);
+    makeSoldListing($yellowPhat, ['price' => 1000, 'sold_at' => now()->subHours(2)]);
+
+    $coins = Item::where('game_id', 995)->firstOrFail();
+    $hybrid = makeSoldListing($redPhat, ['price' => null, 'quantity' => 1]);
+    attachItemOffer($hybrid, [[$coins, 100], [$yellowPhat, 1]]);
 
     $this->get(route('stats.index'))
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('featuredItem.item.id', $b->id)
-            ->where('featuredItem.price', 500)
-            ->where('featuredItem.total', 5000)
+            ->where('topExpensiveItems.0.item.id', $redPhat->id)
+            ->where('topExpensiveItems.0.value', 1100)
         );
+});
 
-    expect(FeaturedItem::count())->toBe(1);
-    expect(FeaturedItem::first()->item_id)->toBe($b->id);
+it('contributes 0 for offer items with no coin sale history (no recursion)', function () {
+    // Cabbage has no coin sale history — its oracle entry is missing.
+    // Red Phat sold for 1 Cabbage → valued at 0 → excluded from price-based stats.
+    $cabbage = makeStatsItem();
+    $redPhat = makeStatsItem();
+
+    $sale = makeSoldListing($redPhat, ['price' => null, 'quantity' => 1]);
+    attachItemOffer($sale, [[$cabbage, 1]]);
+
+    $this->get(route('stats.index'))
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->has('topVolume', 0)
+            ->has('topExpensiveItems', 0)
+            ->has('topExpensiveTrades', 0)
+            // The trade still counts in topTraded (count-based, no price filter).
+            ->has('topTraded', 1)
+            ->where('featuredItem', null)
+        );
+});
+
+it('shows expensive items in topExpensiveItems even when last sold more than 24 hours ago', function () {
+    // Partyhat: only sale ever was 7 days ago at 1B gp.
+    // Cheap item: 1 sale today at 100 gp.
+    $partyhat = makeStatsItem();
+    $cheap = makeStatsItem();
+
+    makeSoldListing($partyhat, ['price' => 1_000_000_000, 'sold_at' => now()->subDays(7)]);
+    makeSoldListing($cheap, ['price' => 100, 'sold_at' => now()->subHours(1)]);
+
+    $this->get(route('stats.index'))
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            // topExpensiveItems is all-time — partyhat ranks #1 despite being inactive today.
+            ->has('topExpensiveItems', 2)
+            ->where('topExpensiveItems.0.item.id', $partyhat->id)
+            ->where('topExpensiveItems.0.value', 1_000_000_000)
+            ->where('topExpensiveItems.1.item.id', $cheap->id)
+            // Other leaderboards stay 24h-bound — partyhat absent.
+            ->has('topVolume', 1)
+            ->where('topVolume.0.item.id', $cheap->id)
+            ->has('topTraded', 1)
+            ->where('topTraded.0.item.id', $cheap->id)
+            ->has('topExpensiveTrades', 1)
+            ->where('topExpensiveTrades.0.item.id', $cheap->id)
+        );
+});
+
+it('averages an item oracle over its 7 most recent coin-priced sales only', function () {
+    // Yellow Phat history (all >24h ago so they don't show up in the leaderboard window —
+    // they only feed the oracle):
+    //   - 1 oldest sale at 999_999_999 gp (8 days ago) — should fall off the 7-recent window
+    //   - 7 sales at 100 gp each (26..32 hours ago)
+    // Oracle for Yellow Phat = AVG of latest 7 = 100 (outlier dropped).
+    // A new Red-Phat-for-Yellow-Phat sale within 24h should value at 100.
+    $yellowPhat = makeStatsItem();
+    $redPhat = makeStatsItem();
+
+    makeSoldListing($yellowPhat, ['price' => 999_999_999, 'sold_at' => now()->subDays(8)]);
+    for ($i = 0; $i < 7; $i++) {
+        makeSoldListing($yellowPhat, ['price' => 100, 'sold_at' => now()->subHours(26 + $i)]);
+    }
+
+    $itemForItem = makeSoldListing($redPhat, ['price' => null, 'quantity' => 1]);
+    attachItemOffer($itemForItem, [[$yellowPhat, 1]]);
+
+    $this->get(route('stats.index'))
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->has('topExpensiveTrades', 1)
+            ->where('topExpensiveTrades.0.item.id', $redPhat->id)
+            ->where('topExpensiveTrades.0.total', 100)
+        );
 });

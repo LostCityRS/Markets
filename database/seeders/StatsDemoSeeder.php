@@ -29,10 +29,12 @@ class StatsDemoSeeder extends Seeder
             ->limit(30)
             ->get();
 
+        $coins = Item::where('game_id', 995)->firstOrFail();
+
         // Track which (item, soldDate) sold-listing IDs we have so historical FeaturedItem can FK to them
         $soldListingsByItem = [];
 
-        Listing::withoutEvents(function () use ($items, $username, &$soldListingsByItem) {
+        Listing::withoutEvents(function () use ($items, $username, $coins, &$soldListingsByItem) {
             foreach ($items as $item) {
                 $count = random_int(5, 50);
                 for ($i = 0; $i < $count; $i++) {
@@ -41,8 +43,9 @@ class StatsDemoSeeder extends Seeder
                         : random_int(24, 24 * 7);  // 40% in days 1–7
                     $soldAt = now()->subHours($hoursAgo);
 
-                    // ~5% null-price (item-for-item) trades
-                    $price = random_int(1, 100) <= 5
+                    // ~5% item-for-item trades (no offers attached so they end up unpriced)
+                    $isItemForItem = random_int(1, 100) <= 5;
+                    $coinPricePerUnit = $isItemForItem
                         ? null
                         : (int) round(max(1, $item->cost) * (0.7 + (random_int(0, 600) / 1000)));
 
@@ -51,11 +54,19 @@ class StatsDemoSeeder extends Seeder
                         'user_id' => $username->user_id,
                         'username' => $username->username,
                         'type' => random_int(0, 1) ? 'buy' : 'sell',
-                        'price' => $price,
+                        'price' => null,
                         'quantity' => random_int(1, 500),
                         'sold_at' => $soldAt,
                         'updated_at' => $soldAt,
                     ]);
+
+                    if ($coinPricePerUnit !== null) {
+                        $offer = $listing->offers()->create(['title' => 'For each item:']);
+                        $offer->items()->create([
+                            'item_id' => $coins->id,
+                            'quantity' => $coinPricePerUnit,
+                        ]);
+                    }
 
                     $soldListingsByItem[$item->id][] = $listing->id;
                 }
