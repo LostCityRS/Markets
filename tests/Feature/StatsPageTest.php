@@ -580,12 +580,12 @@ it('shows expensive items in topExpensiveItems even when last sold more than 24 
         );
 });
 
-it('averages an item oracle over its 7 most recent coin-priced sales only', function () {
+it('takes the median across an item oracle over its 7 most recent coin-priced sales only', function () {
     // Yellow Phat history (all >24h ago so they don't show up in the leaderboard window —
     // they only feed the oracle):
     //   - 1 oldest sale at 999_999_999 gp (8 days ago) — should fall off the 7-recent window
     //   - 7 sales at 100 gp each (26..32 hours ago)
-    // Oracle for Yellow Phat = AVG of latest 7 = 100 (outlier dropped).
+    // Oracle for Yellow Phat = MEDIAN of latest 7 = 100 (outlier dropped).
     // A new Red-Phat-for-Yellow-Phat sale within 24h should value at 100.
     $yellowPhat = makeStatsItem();
     $redPhat = makeStatsItem();
@@ -604,4 +604,86 @@ it('averages an item oracle over its 7 most recent coin-priced sales only', func
             ->where('topExpensiveTrades.0.item.id', $redPhat->id)
             ->where('topExpensiveTrades.0.total', 100)
         );
+});
+
+it('computes a median oracle even when several recent sales tie at the same price', function () {
+    // Real-world distributions cluster heavily at common round prices. With duplicates,
+    // a naive median that pairs row-numbers across two independently-sorted ROW_NUMBER
+    // streams (ASC and DESC) can fail to find a "middle" pair and silently emit no oracle
+    // row at all — making downstream stats wrong-by-omission rather than wrong-by-skew.
+    //
+    // Mirrors observed Guam leaf data: prices [400, 300, 375, 375, 375, 300, 350], median 375.
+    $herb = makeStatsItem();
+    $redPhat = makeStatsItem();
+
+    $prices = [400, 300, 375, 375, 375, 300, 350];
+    foreach ($prices as $i => $price) {
+        makeSoldListing($herb, ['price' => $price, 'sold_at' => now()->subHours(26 + $i)]);
+    }
+
+    // Item-for-item sale of red phat ⇄ 1 herb. Red phat valuation should reflect
+    // the herb oracle (median = 375), not 0 (which would happen if oracle were missing).
+    $sale = makeSoldListing($redPhat, ['price' => null, 'quantity' => 1]);
+    attachItemOffer($sale, [[$herb, 1]]);
+
+    $this->get(route('stats.index'))
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->has('topExpensiveTrades', 1)
+            ->where('topExpensiveTrades.0.item.id', $redPhat->id)
+            ->where('topExpensiveTrades.0.total', 375)
+        );
+});
+
+it('uses median (not mean) for the oracle, ignoring a single rogue sale inside the recent window', function () {
+    // Yellow Phat history within the recent-7 window:
+    //   - 6 sales at 100 gp
+    //   - 1 sale at 999_999_999 gp (input mistake or manipulation)
+    // Median of [100,100,100,100,100,100,999_999_999] = 100. Mean would be ~143M.
+    $yellowPhat = makeStatsItem();
+    $redPhat = makeStatsItem();
+
+    for ($i = 0; $i < 6; $i++) {
+        makeSoldListing($yellowPhat, ['price' => 100, 'sold_at' => now()->subHours(26 + $i)]);
+    }
+    makeSoldListing($yellowPhat, ['price' => 999_999_999, 'sold_at' => now()->subHours(40)]);
+
+    $itemForItem = makeSoldListing($redPhat, ['price' => null, 'quantity' => 1]);
+    attachItemOffer($itemForItem, [[$yellowPhat, 1]]);
+
+    $this->get(route('stats.index'))
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->has('topExpensiveTrades', 1)
+            ->where('topExpensiveTrades.0.item.id', $redPhat->id)
+            ->where('topExpensiveTrades.0.total', 100)
+        );
+});
+
+it('auto-detects when a user entered the offer as a total instead of per-unit', function () {
+    // Red Phat oracle (from 5 prior coin sales) = 100 gp/unit.
+    // Yellow Phat oracle (from 5 prior coin sales) = 1000 gp/unit.
+    // Now: a 50-unit Red Phat listing trades for "1 Yellow Phat" — clearly the buyer is
+    // paying 1 Yellow Phat *total* (≈1000 gp), not per-unit (which would imply 50 Yellow
+    // Phats ≈ 50_000 gp, ~500× overpaying for Red Phat at 100 gp/unit).
+    //
+    // Auto-pick should treat this as a 1000-gp trade total, not 50_000.
+    $redPhat = makeStatsItem();
+    $yellowPhat = makeStatsItem();
+
+    for ($i = 0; $i < 5; $i++) {
+        makeSoldListing($redPhat, ['price' => 100, 'sold_at' => now()->subHours(26 + $i)]);
+        makeSoldListing($yellowPhat, ['price' => 1000, 'sold_at' => now()->subHours(26 + $i)]);
+    }
+
+    $sale = makeSoldListing($redPhat, ['price' => null, 'quantity' => 50, 'sold_at' => now()->subHours(1)]);
+    attachItemOffer($sale, [[$yellowPhat, 1]]);
+
+    $this->get(route('stats.index'))
+        ->assertInertia(function (AssertableInertia $page) use ($redPhat) {
+            $trade = collect($page->toArray()['props']['topExpensiveTrades'])
+                ->firstWhere('item.id', $redPhat->id);
+
+            // Trade total should be the offer's coin value (1000), not offer × listing qty (50_000).
+            expect($trade['total'])->toBe(1000);
+            expect($trade['quantity'])->toBe(50);
+        });
 });

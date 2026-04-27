@@ -13,9 +13,7 @@ const props = defineProps<Pages.StatsPage>();
                 v-if="props.featuredItem"
                 class="mb-6 flex flex-col gap-3 border-2 border-[#382418] bg-stone-950 p-4 sm:flex-row sm:items-center sm:justify-between"
             >
-                <h2 class="text-lg font-bold text-[#90c040]">
-                    Featured Item
-                </h2>
+                <h2 class="text-lg font-bold text-[#90c040]">Featured Item</h2>
 
                 <Link
                     :href="
@@ -69,7 +67,7 @@ const props = defineProps<Pages.StatsPage>();
                 />
 
                 <StatTable
-                    title="Top Trades"
+                    title="Biggest Trades (24 h)"
                     :rows="props.topExpensiveTrades"
                     unit="gp"
                     trade-mode
