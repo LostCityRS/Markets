@@ -30,11 +30,6 @@ watch(
     },
 );
 
-const tabTypes = computed((): Enums.HomeTabType[] => [
-    "buy",
-    "sell",
-    "favorites",
-]);
 const favoritesListingTypes = computed((): Enums.FavoritesListingType[] => [
     "all",
     "buy",
@@ -215,47 +210,7 @@ onUnmounted(() => {
 
         <ItemSearch />
 
-        <div class="relative z-10 mb-[-2px] flex flex-row">
-            <Link
-                :href="route('home', { tab: tabTypes[0] })"
-                preserve-scroll
-                class="px-4 py-3 font-bold"
-                :class="{
-                    'border-2 border-b-0 border-[#382418] bg-black':
-                        props.tab === tabTypes[0],
-                }"
-            >
-                <span class="sm:hidden">Buying</span>
-
-                <span class="hidden sm:inline">Buy Listings</span>
-            </Link>
-
-            <Link
-                :href="route('home', { tab: tabTypes[1] })"
-                preserve-scroll
-                class="px-4 py-3 font-bold"
-                :class="{
-                    'border-2 border-b-0 border-[#382418] bg-black':
-                        props.tab === tabTypes[1],
-                }"
-            >
-                <span class="sm:hidden">Selling</span>
-
-                <span class="hidden sm:inline">Sell Listings</span>
-            </Link>
-
-            <Link
-                :href="route('home', { tab: tabTypes[2] })"
-                preserve-scroll
-                class="px-4 py-3 font-bold"
-                :class="{
-                    'border-2 border-b-0 border-[#382418] bg-black':
-                        props.tab === tabTypes[2],
-                }"
-            >
-                Favorites
-            </Link>
-        </div>
+        <MarketTabs />
 
         <ListingTable @mouseenter="highlightedIds = []">
             <template
