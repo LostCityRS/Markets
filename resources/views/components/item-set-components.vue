@@ -23,7 +23,9 @@ defineProps<{
                     :href="route('items.show', { item: c.item })"
                     class="flex flex-row items-center gap-3 hover:underline"
                 >
-                    <div class="size-fit border-2 border-stone-600 bg-stone-800 p-1">
+                    <div
+                        class="size-fit border-2 border-stone-600 bg-stone-800 p-1"
+                    >
                         <img
                             :src="`/img/items/${encodeURIComponent(c.item.slug)}.webp`"
                             :alt="`${c.item.name} icon`"
@@ -33,7 +35,8 @@ defineProps<{
                     </div>
 
                     <span class="text-[#90C040]">
-                        {{ c.quantity > 1 ? `${c.quantity} × ` : "" }}{{ c.item.name }}
+                        {{ c.quantity > 1 ? `${c.quantity} × ` : ""
+                        }}{{ c.item.name }}
                     </span>
                 </Link>
             </li>

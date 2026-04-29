@@ -217,8 +217,8 @@ const canBumpListings = computed(() =>
 
                     <p class="text-stone-300">
                         If you'd like to re-activate a listing, you can bump or
-                        edit it's information. Expired listings show up here
-                        for up to a week.
+                        edit it's information. Expired listings show up here for
+                        up to a week.
                     </p>
                 </div>
             </div>

@@ -103,7 +103,9 @@ const imagePreview = ref<string | null>(props.bannerForm.banner_image);
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const triggerFileInput = () => {
-    const el = document.querySelector<HTMLInputElement>('input[type="file"][accept="image/*"]');
+    const el = document.querySelector<HTMLInputElement>(
+        'input[type="file"][accept="image/*"]',
+    );
     el?.click();
 };
 
@@ -305,6 +307,7 @@ const removeBannerImage = () => {
 
                 <div class="flex items-center gap-2">
                     <span class="text-sm text-stone-400">Timezone:</span>
+
                     <button
                         v-for="tz in timezones"
                         :key="tz.value"
@@ -334,9 +337,7 @@ const removeBannerImage = () => {
                             :key="type"
                             :value="type"
                         >
-                            {{
-                                type.charAt(0).toUpperCase() + type.slice(1)
-                            }}
+                            {{ type.charAt(0).toUpperCase() + type.slice(1) }}
                         </option>
                     </select>
                 </div>
@@ -392,6 +393,7 @@ const removeBannerImage = () => {
                             alt="Banner preview"
                             class="max-h-[120px] w-full rounded border border-stone-700 object-cover"
                         />
+
                         <div class="flex gap-2">
                             <label
                                 for="banner_image_upload"
@@ -399,6 +401,7 @@ const removeBannerImage = () => {
                             >
                                 Replace
                             </label>
+
                             <button
                                 type="button"
                                 class="text-sm text-red-400 hover:text-red-300"
@@ -431,6 +434,7 @@ const removeBannerImage = () => {
                         <p class="text-sm text-stone-400">
                             Crop your image to banner proportions:
                         </p>
+
                         <Cropper
                             ref="cropperRef"
                             :src="cropperSrc"
@@ -439,6 +443,7 @@ const removeBannerImage = () => {
                             }"
                             class="max-h-[300px] rounded border border-stone-700"
                         />
+
                         <div class="flex gap-2">
                             <BaseButton
                                 type="button"
@@ -448,6 +453,7 @@ const removeBannerImage = () => {
                             >
                                 Apply Crop
                             </BaseButton>
+
                             <button
                                 type="button"
                                 class="text-sm text-stone-400 hover:text-stone-200"

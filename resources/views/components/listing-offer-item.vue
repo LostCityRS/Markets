@@ -58,10 +58,7 @@ const onInput = (e: Event) => {
     <div
         class="flex items-center gap-2 border border-stone-700 bg-stone-800 px-2 py-1"
     >
-        <ItemImage
-            :item="offerItem.item"
-            :quantity="offerItem.quantity"
-        />
+        <ItemImage :item="offerItem.item" :quantity="offerItem.quantity" />
 
         <input
             ref="qtyRef"

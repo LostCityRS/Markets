@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {Tooltip} from "floating-vue";
+import { Tooltip } from "floating-vue";
 import "floating-vue/dist/style.css";
 import PopoverMenu from "@/views/components/PopoverMenu.vue";
 
@@ -79,17 +79,26 @@ const showEach = computed(() => {
 
             <span class="hidden sm:inline">for</span>
 
-            <div v-if="listing.price !== null" class="flex flex-items-center gap-1">
+            <div
+                v-if="listing.price !== null"
+                class="flex-items-center flex gap-1"
+            >
                 <Tooltip
                     class="flex items-center border border-stone-700 bg-stone-800"
                 >
                     <ItemImage
-                        :item="{ id: 1, name: 'Coins', cost: 1, slug: 'gold_pieces', game_id: 995 }"
+                        :item="{
+                            id: 1,
+                            name: 'Coins',
+                            cost: 1,
+                            slug: 'gold_pieces',
+                            game_id: 995,
+                        }"
                         :quantity="listing.price"
                         class="size-full object-cover"
                     />
 
-                    <p class="text-sm sm:text-[medium] px-1">
+                    <p class="px-1 text-sm sm:text-[medium]">
                         {{ formatGold(listing.price) }}
                     </p>
 
@@ -99,7 +108,7 @@ const showEach = computed(() => {
                 </Tooltip>
 
                 <span
-                    class="flex items-center ml-0.5 truncate text-sm text-stone-300"
+                    class="ml-0.5 flex items-center truncate text-sm text-stone-300"
                 >
                     ea.
                 </span>
@@ -115,7 +124,12 @@ const showEach = computed(() => {
                                     :key="index"
                                 >
                                     <div
-                                        v-if="index > 0 && offerItem.offerIndex !== previewItems[index - 1].offerIndex"
+                                        v-if="
+                                            index > 0 &&
+                                            offerItem.offerIndex !==
+                                                previewItems[index - 1]
+                                                    .offerIndex
+                                        "
                                         class="mx-0.5 h-4 w-px bg-stone-700"
                                     />
 
@@ -146,12 +160,10 @@ const showEach = computed(() => {
                                             class="size-full object-cover"
                                         />
 
-                                        <p class="text-sm sm:text-[medium] px-1">
-                                            {{
-                                                formatGold(
-                                                    offerItem.quantity,
-                                                )
-                                            }}
+                                        <p
+                                            class="px-1 text-sm sm:text-[medium]"
+                                        >
+                                            {{ formatGold(offerItem.quantity) }}
                                         </p>
                                     </div>
                                 </template>
@@ -193,7 +205,9 @@ const showEach = computed(() => {
                         <div
                             class="flex flex-col gap-2 border-2 border-stone-700 bg-stone-900 p-2"
                         >
-                            <p class="align-top text-sm leading-none text-stone-200">
+                            <p
+                                class="align-top text-sm leading-none text-stone-200"
+                            >
                                 {{ offer.title }}
                             </p>
 
@@ -220,7 +234,9 @@ const showEach = computed(() => {
                                             >
                                                 <ItemImage
                                                     :item="offerItem.item"
-                                                    :quantity="offerItem.quantity"
+                                                    :quantity="
+                                                        offerItem.quantity
+                                                    "
                                                     class="size-full object-cover"
                                                 />
                                             </Link>
