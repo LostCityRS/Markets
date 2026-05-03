@@ -46,10 +46,7 @@ it('admin can save aliases', function () {
 
     $response->assertRedirect();
 
-    $this->assertDatabaseHas('items', [
-        'id' => $item->id,
-        'search_aliases' => json_encode(['rune scim', 'r scimmy']),
-    ]);
+    expect($item->fresh()->search_aliases)->toBe(['rune scim', 'r scimmy']);
 });
 
 it('admin can clear aliases', function () {

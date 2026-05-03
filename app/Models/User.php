@@ -38,7 +38,6 @@ class User extends Authenticatable implements JWTSubject
      * @var list<string>
      */
     protected $hidden = [
-        'password',
         'remember_token',
         'discord_id',
         'email',
@@ -55,7 +54,6 @@ class User extends Authenticatable implements JWTSubject
         return [
             'email_verified_at' => 'datetime',
             'banned_at' => 'datetime',
-            'password' => 'hashed',
         ];
     }
 

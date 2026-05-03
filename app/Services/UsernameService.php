@@ -28,21 +28,19 @@ class UsernameService
         }
         $usernames = $response->json('usernames');
 
-        $existingUsernames = Username::where('user_id', $user->id)->pluck('username')->toArray();
-        $newUsernames = array_diff($usernames, $existingUsernames);
-        $usernamesToDelete = array_diff($existingUsernames, $usernames);
+        Username::where('user_id', $user->id)
+            ->whereNotIn('username', $usernames)
+            ->delete();
 
-        Username::where('user_id', $user->id)->whereIn('username', $usernamesToDelete)->delete();
+        foreach ($usernames as $username) {
+            Username::updateOrCreate(
+                ['username' => $username],
+                ['user_id' => $user->id],
+            );
 
-        foreach ($newUsernames as $username) {
-            Username::create([
-                'user_id' => $user->id,
-                'username' => $username,
-            ]);
-
-            // Update old listings with new user_id
-            Listing::withoutTimestamps(function() use ($username, $user) {
-                Listing::whereRaw("LOWER(REPLACE(username, ' ', '_')) = LOWER(?)", [$username])->update(['user_id' => $user->id, 'username' => $username]);
+            Listing::withoutTimestamps(function () use ($username, $user) {
+                Listing::whereRaw("LOWER(REPLACE(username, ' ', '_')) = LOWER(?)", [$username])
+                    ->update(['user_id' => $user->id, 'username' => $username]);
             });
         }
     }

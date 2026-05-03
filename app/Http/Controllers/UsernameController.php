@@ -47,8 +47,6 @@ class UsernameController
                 return back()->success('Usernames updated from Lost City');
 
             } catch (\Exception $e) {
-                dd($e);
-
                 return back()->error('An error occurred while updating your usernames');
             }
         } else {
