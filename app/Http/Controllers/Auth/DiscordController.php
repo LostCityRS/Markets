@@ -22,13 +22,20 @@ class DiscordController extends Controller
         try {
             $discordUser = Socialite::driver('discord')->user();
 
-            $user = User::updateOrCreate(
-                ['discord_id' => $discordUser->id],
-                [
-                    'name' => $discordUser->name ?? $discordUser->nickname,
-                    'email' => $discordUser->email
-                ]
-            );
+            $user = User::where('discord_id', $discordUser->id)->first()
+                ?? User::where('email', $discordUser->email)->first();
+
+            $attributes = [
+                'name' => $discordUser->name ?? $discordUser->nickname,
+                'email' => $discordUser->email,
+                'discord_id' => $discordUser->id,
+            ];
+
+            if ($user) {
+                $user->update($attributes);
+            } else {
+                $user = User::create($attributes);
+            }
 
             Auth::login($user, true);
 
