@@ -3,7 +3,6 @@ const page = usePage();
 
 const currentTab = computed(() => {
     if (page.url.startsWith("/sales")) return "sales";
-    if (page.url.startsWith("/stats")) return "stats";
 
     const url = new URL(page.url, "http://placeholder");
     const tab = url.searchParams.get("tab") ?? "buy";
@@ -31,12 +30,6 @@ const tabs = computed(() => [
         label: "Recent Sales",
         mobileLabel: "Sales",
         href: route("sales.index"),
-    },
-    {
-        key: "stats",
-        label: "Stats",
-        mobileLabel: "Stats",
-        href: route("stats.index"),
     },
     {
         key: "favorites",

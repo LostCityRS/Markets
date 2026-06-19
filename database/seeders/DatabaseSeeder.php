@@ -49,7 +49,5 @@ class DatabaseSeeder extends Seeder
                     ->count(rand(1, 3))
                     ->create(['user_id' => $user->id]);
             });
-
-        $this->call(StatsDemoSeeder::class);
     }
 }

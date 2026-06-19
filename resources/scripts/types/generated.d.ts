@@ -177,20 +177,6 @@ is_banned: boolean;
 banned_reason: string | null;
 };
 }
-declare namespace Data.Stats {
-export type StatItemData = {
-item: Data.Item.ItemData;
-value: number;
-};
-export type StatTradeData = {
-item: Data.Item.ItemData;
-price: number;
-quantity: number;
-total: number;
-username: string;
-soldAt: string;
-};
-}
 declare namespace Data.User {
 export type AdminUserData = {
 id: number;
@@ -258,13 +244,6 @@ listings: {data:Array<Data.Listing.ListingData>;links:Array<{url:string | null;l
 };
 export type ReferralsIndexPage = {
 referrals: {data:Array<Data.Referral.ReferralData>;links:Array<{url:string | null;label:string;active:boolean;}>;meta:{current_page:number;first_page_url:string;from:number | null;last_page:number;last_page_url:string;next_page_url:string | null;path:string;per_page:number;prev_page_url:string | null;to:number | null;total:number;};};
-};
-export type StatsPage = {
-topVolume: Array<Data.Stats.StatItemData>;
-topExpensiveItems: Array<Data.Stats.StatItemData>;
-topTraded: Array<Data.Stats.StatItemData>;
-topExpensiveTrades: Array<Data.Stats.StatTradeData>;
-featuredItem: Data.Stats.StatTradeData | null;
 };
 export type UsersIndexPage = {
 username: string;

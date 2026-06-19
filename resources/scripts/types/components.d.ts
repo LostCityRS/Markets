@@ -40,7 +40,6 @@ declare module 'vue' {
     PriceTableData: typeof import('./../../views/components/listings-table/price-table-data.vue')['default']
     SnapSlider: typeof import('./../../views/components/snap-slider.vue')['default']
     SortHeader: typeof import('./../../views/components/sort-header.vue')['default']
-    StatTable: typeof import('./../../views/components/stat-table.vue')['default']
     TimestampTableData: typeof import('./../../views/components/listings-table/timestamp-table-data.vue')['default']
     UsernamesAlert: typeof import('./../../views/components/usernames-alert.vue')['default']
     UsernameTableData: typeof import('./../../views/components/listings-table/username-table-data.vue')['default']

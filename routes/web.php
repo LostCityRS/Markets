@@ -18,7 +18,6 @@ use App\Http\Controllers\ListingSaleController;
 use App\Http\Controllers\PauseController;
 use App\Http\Controllers\RecentSalesController;
 use App\Http\Controllers\ReferralController;
-use App\Http\Controllers\StatsController;
 use App\Http\Controllers\UnpauseController;
 use App\Http\Controllers\UsernameController;
 use App\Http\Middleware\AuthorizeAdmin;
@@ -29,8 +28,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
-
-Route::get('/stats', StatsController::class)->name('stats.index');
 
 Route::get('/sales', RecentSalesController::class)->name('sales.index');
 
