@@ -35,8 +35,6 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      */
     protected function hideSensitiveRequestDetails(): void
     {
-        Telescope::hideRequestParameters(['code', 'code_verifier', 'state', 'code_challenge']);
-
         if ($this->app->environment('local')) {
             return;
         }

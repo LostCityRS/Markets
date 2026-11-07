@@ -17,7 +17,7 @@ class DiscordController extends Controller
         return Socialite::driver('discord')->redirect();
     }
 
-    public function handleDiscordCallback(Request $request)
+    public function handleDiscordCallback()
     {
         try {
             $discordUser = Socialite::driver('discord')->user();
@@ -43,10 +43,6 @@ class DiscordController extends Controller
                 UsernameService::updateUsernamesForUser($user);
             } catch (\Exception $e) {
                 return to_route('listings.index')->error('An error occurred while updating your usernames');
-            }
-
-            if ($request->session()->has('labs_auth')) {
-                return app(LabsController::class)->complete($request, $request->session()->pull('labs_auth'));
             }
 
             return to_route('listings.index')->success('You have successfully logged in');

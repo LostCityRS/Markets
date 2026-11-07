@@ -101,9 +101,6 @@ Route::get('items/{item:slug}', [ItemController::class, 'show'])
 Route::get('users/{username:username}', [UsernameController::class, 'show'])
     ->name('usernames.show');
 
-Route::get('/auth/labs', [\App\Http\Controllers\Auth\LabsController::class, 'authorize'])
-    ->middleware('throttle:10,1')->name('auth.labs');
-
 Route::get('/auth/discord', [DiscordController::class, 'redirectToDiscord'])
     ->name('auth.discord');
 
